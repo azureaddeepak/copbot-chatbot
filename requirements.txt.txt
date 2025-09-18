@@ -1,0 +1,8 @@
+streamlit
+pandas
+langchain
+langchain-google-genai    # ✅ Required for Gemini
+langchain-community
+langchain-text-splitters
+faiss-cpu
+sentence-transformers     # ✅ For free local embeddings
