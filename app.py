@@ -30,7 +30,7 @@ st.markdown("""
 # Add logo and title
 col1, col2 = st.columns([1, 4])
 with col1:
-    st.image("tn_logo.png", width=80)  # Slightly larger logo
+    st.image("tn_logo.png", width=90)  # Slightly larger logo
 
 # Language toggle in sidebar
 with st.sidebar:
