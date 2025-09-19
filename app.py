@@ -1,4 +1,4 @@
-# app.py - CopBotChatbox: Thoothukudi Police Assistant (GEMINI MODE - SECURE)
+# app.py - CopBotChatbox: chennai Police Assistant (GEMINI MODE - SECURE)
 
 import streamlit as st
 import pandas as pd
@@ -13,7 +13,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 
 # Set page config
 st.set_page_config(
-    page_title="👮 CopBotChatbox - Thoothukudi Police",
+    page_title="👮 CopBotChatbox - chennai Police",
     page_icon="👮",
     layout="wide"
 )
@@ -32,19 +32,19 @@ st.markdown("""
 with st.sidebar:
     st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Police_India.svg/1200px-Police_India.svg.png", width=100)
     st.title("👮 CopBotChatbox")
-    st.markdown("### Thoothukudi District Police")
+    st.markdown("### chennai District Police")
     language = st.radio("Select Language / மொழியைத் தேர்ந்தெடுக்கவும்", ["English", "தமிழ் (Tamil)"], index=0)
     st.markdown("---")
     st.markdown("### 📍 Police Stations")
     st.write("Map coming soon...")
     st.markdown("### 🆘 Emergency Numbers")
     st.write("📞 Police: 100")
-    st.write("📞 Women Helpline: 1091")
-    st.write("📞 Cyber Crime: 1930")
+st.write("📞 Women Helpline: 1091")
+st.write("📞 Cyber Crime: 1930")
 
 # Main Header
 if language == "English":
-    st.title("👮 Welcome to Thoothukudi District Police Assistance Bot")
+    st.title("👮 Welcome to chennai District Police Assistance Bot")
     st.markdown("Ask me anything about filing complaints, FIRs, procedures, or emergency contacts.")
 else:
     st.title("👮 தூத்துக்குடி மாவட்ட காவல்துறை உதவி போட் க்கு வரவேற்கிறோம்")
