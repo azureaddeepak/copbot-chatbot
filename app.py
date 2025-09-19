@@ -27,6 +27,12 @@ st.markdown("""
     .stTextInput>div>div>input { border: 2px solid #1f77b4; }
 </style>
 """, unsafe_allow_html=True)
+# Add logo and title
+col1, col2 = st.columns([1, 4])
+with col1:
+    st.image("tn_logo.png", width=60)  # Small logo
+with col2:
+    st.title("👮 Chennai District Police Assistance Bot")
 
 # Language toggle in sidebar
 with st.sidebar:
