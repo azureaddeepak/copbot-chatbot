@@ -39,8 +39,8 @@ with st.sidebar:
     st.write("Map coming soon...")
     st.markdown("### 🆘 Emergency Numbers")
     st.write("📞 Police: 100")
-st.write("📞 Women Helpline: 1091")
-st.write("📞 Cyber Crime: 1930")
+    st.write("📞 Women Helpline: 1091")
+    st.write("📞 Cyber Crime: 1930")
 
 # Main Header
 if language == "English":
