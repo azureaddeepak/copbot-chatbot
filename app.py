@@ -31,8 +31,6 @@ st.markdown("""
 col1, col2 = st.columns([1, 4])
 with col1:
     st.image("tn_logo.png", width=60)  # Small logo
-with col2:
-    st.title("👮 Chennai District Police Assistance Bot")
 
 # Language toggle in sidebar
 with st.sidebar:
