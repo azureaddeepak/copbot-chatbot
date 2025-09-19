@@ -36,15 +36,25 @@ with col1:
 with st.sidebar:
     st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Police_India.svg/1200px-Police_India.svg.png", width=100)
     st.title("👮 CopBotChatbox")
-    st.markdown("### chennai District Police")
-    language = st.radio("Select Language / மொழியைத் தேர்ந்தெடுக்கவும்", ["English", "தமிழ் (Tamil)"], index=0)
+    st.markdown("### Chennai District Police")
+    language = st.radio("Select Language / மொழியைத் தர்ந்தெடுக்கவும்", ["English", "தமிழ் (Tamil)"], index=0)
     st.markdown("---")
-    st.markdown("### 📍 Police Stations")
-    st.write("Map coming soon...")
-    st.markdown("### 🆘 Emergency Numbers")
-    st.write("📞 Police: 100")
-    st.write("📞 Women Helpline: 1091")
-    st.write("📞 Cyber Crime: 1930")
+
+# Main content
+st.markdown("## Police Assistance Cell")
+st.markdown("### 👋 Welcome! I am the Chennai District Police Assistance bot. How can I help you?")
+
+# Buttons
+col1, col2, col3 = st.columns(3)
+with col1:
+    if st.button("Emergency contacts"):
+        st.info("📞 Police: 100\n📞 Women Helpline: 1091\n📞 Cyber Crime: 1930")
+with col2:
+    if st.button("Police stations"):
+        st.info("📍 Map coming soon...")
+with col3:
+    if st.button("How to file a complaint?"):
+        st.info("👉 Visit your state police portal (e.g., https://delhipolice.gov.in). Click 'File Complaint' or 'E-FIR'. Fill in details and upload documents.")
 
 # Main Header
 if language == "English":
