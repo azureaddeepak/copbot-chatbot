@@ -236,13 +236,11 @@ if area_clean in chennai_police_stations:
 **📞 Phone:** {station['phone']}
 **🗺️ Jurisdiction:** {station['jurisdiction']}
 """)
-    time.sleep(4)  # Show for 4 seconds
-    st.experimental_rerun()  # Hide after 4 seconds
-            else:
-                st.warning(f"⚠️ No exact match for '{area_clean}'. Try these nearby areas:")
-                suggestions = list(chennai_police_stations.keys())[:5]
-                for loc in suggestions:
-                    st.write(f"🔹 **{loc}** → {chennai_police_stations[loc]['name']}")
+else:
+    st.warning(f"⚠️ No exact match for '{area_clean}'. Try these nearby areas:")
+    suggestions = list(chennai_police_stations.keys())[:5]
+    for loc in suggestions:
+        st.write(f"🔹 **{loc}**")
 
 # Language toggle in sidebar
 with st.sidebar:
