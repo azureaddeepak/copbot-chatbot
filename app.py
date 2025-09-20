@@ -243,10 +243,6 @@ with st.sidebar:
     st.markdown("### Chennai District Police")
     language = st.radio("Select Language / மொழியைத் தர்ந்தெடுக்கவும்", ["English", "தமிழ் (Tamil)"], index=0)
     st.markdown("---")
-    st.markdown("### 🆘 Emergency Numbers")
-    st.write("📞 Police: 100")
-    st.write("📞 Women Helpline: 1091")
-    st.write("📞 Cyber Crime: 1930")
 
 # Initialize session state
 if "vectorstore" not in st.session_state:
