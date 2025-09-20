@@ -1,3 +1,4 @@
+
 # app.py - CopBotChatbox: Chennai Police Assistant (GEMINI MODE - SECURE)
 
 import streamlit as st
@@ -229,7 +230,7 @@ with btn_col4:
 
         if area.strip():
             area_clean = area.strip().title()
-          if area_clean in chennai_police_stations:
+         if area_clean in chennai_police_stations:
     station = chennai_police_stations[area_clean]
     with st.expander("✅ Station Found", expanded=True):
         st.success(f"""
