@@ -1,4 +1,16 @@
-# app.py - CopBotChatbox: chennai Police Assistant (GEMINI MODE - SECURE)
+# app.py - CopBotChatbox: Chennai Police Assistant (GEMINI MODE - SECURE)
+
+import streamlit as st
+import pandas as pd
+import os
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import FAISS
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.output_parsers import StrOutputParser
+from langchain_google_genai import ChatGoogleGenerativeAI
+
 # Chennai Police Station Data (City-Wide Coverage)
 chennai_police_stations = {
     # Central Chennai
@@ -130,20 +142,9 @@ chennai_police_stations = {
     }
 }
 
-import streamlit as st
-import pandas as pd
-import os
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.vectorstores import FAISS
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnablePassthrough
-from langchain_core.output_parsers import StrOutputParser
-from langchain_google_genai import ChatGoogleGenerativeAI
-
 # Set page config
 st.set_page_config(
-    page_title="👮 CopBotChatbox - chennai Police",
+    page_title="👮 CopBotChatbox - Chennai Police",
     page_icon="👮",
     layout="wide"
 )
@@ -157,10 +158,61 @@ st.markdown("""
     .stTextInput>div>div>input { border: 2px solid #1f77b4; }
 </style>
 """, unsafe_allow_html=True)
-# Add logo and title
+
+# Add logo and title + buttons in columns
 col1, col2 = st.columns([1, 4])
+
 with col1:
     st.image("tn_logo.png", width=90)  # Slightly larger logo
+
+with col2:
+    st.title("👮 Chennai District Police Assistance Bot")
+    st.markdown("## Police Assistance Cell")
+    st.markdown("### 👋 Welcome! I am the Chennai District Police Assistance bot. How can I help you?")
+
+    # Buttons row
+    btn_col1, btn_col2, btn_col3, btn_col4 = st.columns(4)
+
+    with btn_col1:
+        if st.button("🚨 Emergency Contacts", use_container_width=True):
+            st.info("""
+📞 **Police**: 100  
+📞 **Women Helpline**: 1091  
+📞 **Cyber Crime**: 1930  
+📞 **Child Helpline**: 1098  
+📞 **Ambulance/Fire**: 112
+""")
+
+    with btn_col2:
+        if st.button("👮 Police Stations", use_container_width=True):
+            st.info("📍 **Interactive Map Coming Soon**\n\nMeanwhile, use 'Find Nearby Police Station' to search by area.")
+
+    with btn_col3:
+        if st.button("📝 How to File Complaint?", use_container_width=True):
+            st.info("""
+👉 **Online**: Visit [Tamil Nadu Police Portal](https://www.tnpolice.gov.in) → Click 'e-FIR' or 'Complaint'\n
+👉 **Offline**: Visit nearest police station → Submit written complaint → Get stamped copy\n
+👉 **Documents Needed**: ID Proof, Address Proof, Incident Details, Photos/Videos (if any)
+""")
+
+    with btn_col4:
+        if st.button("📍 Find Nearby Police Station", use_container_width=True):
+            area = st.text_input("Enter your area (e.g., Kovur, Velachery):", key="area_input", placeholder="Type your locality...")
+            if area:
+                area = area.strip().title()
+                if area in chennai_police_stations:
+                    station = chennai_police_stations[area]
+                    st.success(f"""
+**📍 {station['name']}**
+**🏠 Address:** {station['address']}
+**📞 Phone:** {station['phone']}
+**🗺️ Jurisdiction:** {station['jurisdiction']}
+""")
+                else:
+                    st.warning(f"⚠️ No exact match for '{area}'. Try these nearby areas:")
+                    suggestions = list(chennai_police_stations.keys())[:5]
+                    for loc in suggestions:
+                        st.write(f"🔹 **{loc}**")
 
 # Language toggle in sidebar
 with st.sidebar:
@@ -169,37 +221,10 @@ with st.sidebar:
     st.markdown("### Chennai District Police")
     language = st.radio("Select Language / மொழியைத் தர்ந்தெடுக்கவும்", ["English", "தமிழ் (Tamil)"], index=0)
     st.markdown("---")
-
-# Main content
-st.markdown("## Police Assistance Cell")
-st.markdown("### 👋 Welcome! I am the Chennai District Police Assistance bot. How can I help you?")
-
-# Buttons
-with col2:
-    if st.button("👮 Find Nearby Police Station"):
-        area = st.text_input("Enter your area or locality in Chennai (e.g., Kovur, Velachery, Teynampet):", key="area_input")
-        if area:
-            area = area.strip().title()
-            if area in chennai_police_stations:
-                station = chennai_police_stations[area]
-                st.success(f"""
-**📍 {station['name']}**
-**🏠 Address:** {station['address']}
-**📞 Phone:** {station['phone']}
-**🗺️ Jurisdiction:** {station['jurisdiction']}
-""")
-            else:
-                st.warning(f"⚠️ No exact match for '{area}'. Here are nearby stations you can try:")
-                # Show first 5 stations as suggestions
-                for i, (loc, info) in enumerate(list(chennai_police_stations.items())[:5]):
-                    st.write(f"🔹 **{loc}** → {info['name']}")
-# Main Header
-if language == "English":
-    st.title("👮 Welcome to Chennai District Police Assistance Bot")
-    st.markdown("Ask me anything about filing complaints, FIRs, procedures, or emergency contacts.")
-else:
-    st.title("👮 தூத்துக்குடி மாவட்ட காவல்துறை உதவி போட் க்கு வரவேற்கிறோம்")
-    st.markdown("புகார் பதிவு, எஃப்ஐஆர், நடைமுறைகள் அல்லது அவசர தொடர்புகள் குறித்து என்னிடம் கேளுங்கள்.")
+    st.markdown("### 🆘 Emergency Numbers")
+    st.write("📞 Police: 100")
+    st.write("📞 Women Helpline: 1091")
+    st.write("📞 Cyber Crime: 1930")
 
 # Initialize session state
 if "vectorstore" not in st.session_state:
@@ -269,7 +294,7 @@ if user_query and st.session_state.vectorstore:
         # ✅ SECURE: Use API key from Streamlit Secrets
         llm = ChatGoogleGenerativeAI(
             model="gemini-1.5-flash",
-            google_api_key=st.secrets["GEMINI_API_KEY"],  # ← Securely loaded
+            google_api_key=st.secrets["GEMINI_API_KEY"],
             temperature=0,
             convert_system_message_to_human=True
         )
@@ -288,4 +313,4 @@ if user_query and st.session_state.vectorstore:
 
 # Footer
 st.markdown("---")
-st.caption("ℹ️ Official demo by Thoothukudi District Police. Powered by Google Gemini. Responses based only on official documents.")
+st.caption("ℹ️ Official demo by Chennai District Police. Powered by Google Gemini. Responses based only on official documents.")
