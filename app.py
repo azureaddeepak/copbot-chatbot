@@ -11,6 +11,13 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain_google_genai import ChatGoogleGenerativeAI
 
+# Initialize session state for police station search
+if "show_police_search" not in st.session_state:
+    st.session_state.show_police_search = False
+
+if "searched_area" not in st.session_state:
+    st.session_state.searched_area = ""
+
 # Chennai Police Station Data (City-Wide Coverage)
 chennai_police_stations = {
     # Central Chennai
