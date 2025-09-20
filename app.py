@@ -28,12 +28,12 @@ chennai_police_stations = {
     },
     # ... rest of stations
 }
-    "Royapettah": {
-        "name": "Royapettah Police Station",
-        "address": "No. 3, Pycrofts Road, Royapettah, Chennai - 600014",
-        "phone": "044-2847 1000",
-        "jurisdiction": "Royapettah, Triplicane, Chepauk"
-    },
+"Royapettah": {
+    "name": "Royapettah Police Station",
+    "address": "No. 3, Pycrofts Road, Royapettah, Chennai - 600014",
+    "phone": "044-2847 1000",
+    "jurisdiction": "Royapettah, Triplicane, Chepauk"
+},
     "Egmore": {
         "name": "Egmore Police Station",
         "address": "No. 1, Pantheon Road, Egmore, Chennai - 600008",
