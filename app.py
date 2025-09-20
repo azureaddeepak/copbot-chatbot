@@ -225,14 +225,19 @@ with btn_col4:
 
         if area.strip():
             area_clean = area.strip().title()
-            if area_clean in chennai_police_stations:
-                station = chennai_police_stations[area_clean]
-                st.success(f"""
+    import time
+
+if area_clean in chennai_police_stations:
+    station = chennai_police_stations[area_clean]
+    with st.expander("🔍 Station Found"):
+        st.success(f"""
 **📍 {station['name']}**
 **🏠 Address:** {station['address']}
 **📞 Phone:** {station['phone']}
 **🗺️ Jurisdiction:** {station['jurisdiction']}
 """)
+    time.sleep(4)  # Show for 4 seconds
+    st.experimental_rerun()  # Hide after 4 seconds
             else:
                 st.warning(f"⚠️ No exact match for '{area_clean}'. Try these nearby areas:")
                 suggestions = list(chennai_police_stations.keys())[:5]
