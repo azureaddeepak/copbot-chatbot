@@ -196,24 +196,38 @@ with col2:
 """)
 
 with btn_col4:
+    # Toggle button to show/hide search
     if st.button("📍 Find Nearby Police Station", use_container_width=True):
-        with st.expander("🔍 Search by Area"):
-            area = st.text_input("Enter your area (e.g., Kovur, Velachery):", key="area_input", placeholder="Type your locality...")
-            if area:
-                area = area.strip().title()
-                if area in chennai_police_stations:
-                    station = chennai_police_stations[area]
-                    st.success(f"""
+        st.session_state.show_police_search = not st.session_state.show_police_search
+
+    # Show search box if toggled on
+    if st.session_state.show_police_search:
+        st.markdown("### 🔍 Search Police Station by Area")
+        area = st.text_input(
+            "Enter your area (e.g., Kovur, Velachery, Teynampet):",
+            value=st.session_state.searched_area,
+            key="area_input_unique",
+            placeholder="Type your locality and press Enter..."
+        )
+
+        # Update session state when user types
+        st.session_state.searched_area = area
+
+        if area.strip():
+            area_clean = area.strip().title()
+            if area_clean in chennai_police_stations:
+                station = chennai_police_stations[area_clean]
+                st.success(f"""
 **📍 {station['name']}**
 **🏠 Address:** {station['address']}
 **📞 Phone:** {station['phone']}
 **🗺️ Jurisdiction:** {station['jurisdiction']}
 """)
-                else:
-                    st.warning(f"⚠️ No exact match for '{area}'. Try these nearby areas:")
-                    suggestions = list(chennai_police_stations.keys())[:5]
-                    for loc in suggestions:
-                        st.write(f"🔹 **{loc}**")
+            else:
+                st.warning(f"⚠️ No exact match for '{area_clean}'. Try these nearby areas:")
+                suggestions = list(chennai_police_stations.keys())[:5]
+                for loc in suggestions:
+                    st.write(f"🔹 **{loc}** → {chennai_police_stations[loc]['name']}")
 
 # Language toggle in sidebar
 with st.sidebar:
