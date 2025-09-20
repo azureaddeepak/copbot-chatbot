@@ -3,6 +3,7 @@
 import streamlit as st
 import pandas as pd
 import os
+import time
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -20,6 +21,7 @@ if "searched_area" not in st.session_state:
 
 # Chennai Police Station Data (City-Wide Coverage)
 chennai_police_stations = {
+    # Central Chennai
     "Parry's Corner": {
         "name": "Parry's Corner Police Station",
         "address": "No. 1, Rajaji Salai, George Town, Chennai - 600001",
@@ -49,14 +51,13 @@ chennai_police_stations = {
         "address": "No. 1, Royapettah High Road, Mylapore, Chennai - 600004",
         "phone": "044-2499 1000",
         "jurisdiction": "Mylapore, Santhome, Adyar"
-    }
-}
+    },
     "Thiruvanmiyur": {
-    "name": "Thiruvanmiyur Police Station",
-    "address": "No. 1, Thiruvanmiyur High Road, Thiruvanmiyur, Chennai - 600037",
-    "phone": "044-2835 1000",
-    "jurisdiction": "Thiruvanmiyur, Mylapore, Guindy"
-},
+        "name": "Thiruvanmiyur Police Station",
+        "address": "No. 1, Rajiv Gandhi Salai, Thiruvanmiyur, Chennai - 600041",
+        "phone": "044-2444 1000",
+        "jurisdiction": "Thiruvanmiyur, Adyar, Besant Nagar"
+    },
 
     # South Chennai
     "Velachery": {
@@ -156,9 +157,6 @@ st.set_page_config(
     layout="wide"
 )
 
-# Add Gandhi image to left sidebar
-st.sidebar.image("gandhi.jpg", use_column_width=True, caption="Mahatma Gandhi")
-
 # Custom CSS for design
 st.markdown("""
 <style>
@@ -169,78 +167,12 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Add logo and title + buttons in columns
+# Add logo and title
 col1, col2 = st.columns([1, 4])
-
 with col1:
-    st.image("tn_logo.png", width=90)  # Slightly larger logo
-
+    st.image("tn_logo.png", width=90)
 with col2:
     st.title("👮 Chennai District Police Assistance Bot")
-    st.markdown("## Police Assistance Cell")
-    st.markdown("### 👋 Welcome! I am the Chennai District Police Assistance bot. How can I help you?")
-
-    # Buttons row
-    btn_col1, btn_col2, btn_col3, btn_col4 = st.columns(4)
-
-    with btn_col1:
-        if st.button("🚨 Emergency Contacts", use_container_width=True):
-            st.info("""
-📞 **Police**: 100  
-📞 **Women Helpline**: 1091  
-📞 **Cyber Crime**: 1930  
-📞 **Child Helpline**: 1098  
-📞 **Ambulance/Fire**: 112
-""")
-
-    with btn_col2:
-        if st.button("👮 Police Stations", use_container_width=True):
-            st.info("📍 **Interactive Map Coming Soon**\n\nMeanwhile, use 'Find Nearby Police Station' to search by area.")
-
-    with btn_col3:
-        if st.button("📝 How to File Complaint?", use_container_width=True):
-            st.info("""
-👉 **Online**: Visit [Tamil Nadu Police Portal](https://www.tnpolice.gov.in) → Click 'e-FIR' or 'Complaint'\n
-👉 **Offline**: Visit nearest police station → Submit written complaint → Get stamped copy\n
-👉 **Documents Needed**: ID Proof, Address Proof, Incident Details, Photos/Videos (if any)
-""")
-
-with btn_col4:
-    # Toggle button to show/hide search
-    if st.button("📍 Find Nearby Police Station", use_container_width=True):
-        st.session_state.show_police_search = not st.session_state.show_police_search
-
-    # Show search box if toggled on
-    if st.session_state.show_police_search:
-        st.markdown("### 🔍 Search Police Station by Area")
-        area = st.text_input(
-            "Enter your area (e.g., Kovur, Velachery, Teynampet):",
-            value=st.session_state.searched_area,
-            key="area_input_unique",
-            placeholder="Type your locality and press Enter..."
-        )
-
-        # Update session state when user types
-        st.session_state.searched_area = area
-
-        if area.strip():
-            area_clean = area.strip().title()
-    import time
-
-if area_clean in chennai_police_stations:
-    station = chennai_police_stations[area_clean]
-    with st.expander("🔍 Station Found"):
-        st.success(f"""
-**📍 {station['name']}**
-**🏠 Address:** {station['address']}
-**📞 Phone:** {station['phone']}
-**🗺️ Jurisdiction:** {station['jurisdiction']}
-""")
-else:
-    st.warning(f"⚠️ No exact match for '{area_clean}'. Try these nearby areas:")
-    suggestions = list(chennai_police_stations.keys())[:5]
-    for loc in suggestions:
-        st.write(f"🔹 **{loc}**")
 
 # Language toggle in sidebar
 with st.sidebar:
@@ -249,8 +181,73 @@ with st.sidebar:
     st.markdown("### Chennai District Police")
     language = st.radio("Select Language / மொழியைத் தர்ந்தெடுக்கவும்", ["English", "தமிழ் (Tamil)"], index=0)
     st.markdown("---")
+    # Add Gandhi image
+    st.image("gandhi.jpg", use_column_width=True, caption="Mahatma Gandhi")
 
-# Initialize session state
+# Main content
+st.markdown("## Police Assistance Cell")
+st.markdown("### 👋 Welcome! I am the Chennai District Police Assistance bot. How can I help you?")
+
+# Buttons — 4 in one row
+btn_col1, btn_col2, btn_col3, btn_col4 = st.columns(4)
+
+with btn_col1:
+    if st.button("🚨 Emergency Contacts", use_container_width=True):
+        st.info("""
+📞 **Police**: 100  
+📞 **Women Helpline**: 1091  
+📞 **Cyber Crime**: 1930  
+📞 **Child Helpline**: 1098  
+📞 **Ambulance/Fire**: 112
+""")
+
+with btn_col2:
+    if st.button("👮 Police Stations", use_container_width=True):
+        st.info("📍 **Interactive Map Coming Soon**\n\nMeanwhile, use 'Find Nearby Police Station' to search by area.")
+
+with btn_col3:
+    if st.button("📝 How to File Complaint?", use_container_width=True):
+        st.info("""
+👉 **Online**: Visit [Tamil Nadu Police Portal](https://www.tnpolice.gov.in) → Click 'e-FIR' or 'Complaint'\n
+👉 **Offline**: Visit nearest police station → Submit written complaint → Get stamped copy\n
+👉 **Documents Needed**: ID Proof, Address Proof, Incident Details, Photos/Videos (if any)
+""")
+
+with btn_col4:
+    if st.button("📍 Find Nearby Police Station", use_container_width=True):
+        st.session_state.show_police_search = not st.session_state.show_police_search
+
+    if st.session_state.show_police_search:
+        st.markdown("### 🔍 Search Police Station by Area")
+        area = st.text_input(
+            "Enter your area (e.g., Kovur, Velachery, Teynampet):",
+            value=st.session_state.searched_area,
+            key="area_input_unique",
+            placeholder="Type your locality and press Enter..."
+        )
+        st.session_state.searched_area = area
+
+        if area.strip():
+            area_clean = area.strip().title()
+            if area_clean in chennai_police_stations:
+                station = chennai_police_stations[area_clean]
+                with st.expander("✅ Station Found", expanded=True):
+                    st.success(f"""
+**📍 {station['name']}**
+**🏠 Address:** {station['address']}
+**📞 Phone:** {station['phone']}
+**🗺️ Jurisdiction:** {station['jurisdiction']}
+""")
+                time.sleep(4)
+                st.session_state.show_police_search = False
+                st.rerun()
+            else:
+                st.warning(f"⚠️ No exact match for '{area_clean}'. Try these nearby areas:")
+                suggestions = list(chennai_police_stations.keys())[:5]
+                for loc in suggestions:
+                    st.write(f"🔹 **{loc}** → {chennai_police_stations[loc]['name']}")
+
+# Initialize session state for RAG
 if "vectorstore" not in st.session_state:
     st.session_state.vectorstore = None
 if "data_loaded" not in st.session_state:
