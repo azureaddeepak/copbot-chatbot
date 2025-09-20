@@ -51,12 +51,12 @@ chennai_police_stations = {
         "jurisdiction": "Mylapore, Santhome, Adyar"
     }
 }
-    "Thiruvanmiyur": {
-        "name": "Thiruvanmiyur Police Station",
-        "address": "No. 1, Rajiv Gandhi Salai, Thiruvanmiyur, Chennai - 600041",
-        "phone": "044-2444 1000",
-        "jurisdiction": "Thiruvanmiyur, Adyar, Besant Nagar"
-    },
+"Thiruvanmiyur": {
+    "name": "Thiruvanmiyur Police Station",
+    "address": "No. 1, Thiruvanmiyur High Road, Thiruvanmiyur, Chennai - 600037",
+    "phone": "044-2835 1000",
+    "jurisdiction": "Thiruvanmiyur, Mylapore, Guindy"
+},
 
     # South Chennai
     "Velachery": {
