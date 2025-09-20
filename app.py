@@ -195,8 +195,9 @@ with col2:
 👉 **Documents Needed**: ID Proof, Address Proof, Incident Details, Photos/Videos (if any)
 """)
 
-    with btn_col4:
-        if st.button("📍 Find Nearby Police Station", use_container_width=True):
+  with btn_col4:
+    if st.button("📍 Find Nearby Police Station", use_container_width=True):
+        with st.expander("🔍 Search by Area"):
             area = st.text_input("Enter your area (e.g., Kovur, Velachery):", key="area_input", placeholder="Type your locality...")
             if area:
                 area = area.strip().title()
