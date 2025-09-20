@@ -20,13 +20,14 @@ if "searched_area" not in st.session_state:
 
 # Chennai Police Station Data (City-Wide Coverage)
 chennai_police_stations = {
-    # Central Chennai
     "Parry's Corner": {
         "name": "Parry's Corner Police Station",
         "address": "No. 1, Rajaji Salai, George Town, Chennai - 600001",
         "phone": "044-2522 1000",
         "jurisdiction": "George Town, Parry's, Sowcarpet"
     },
+    # ... rest of stations
+}
     "Royapettah": {
         "name": "Royapettah Police Station",
         "address": "No. 3, Pycrofts Road, Royapettah, Chennai - 600014",
