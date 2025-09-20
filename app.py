@@ -182,7 +182,7 @@ with st.sidebar:
     language = st.radio("Select Language / மொழியைத் தர்ந்தெடுக்கவும்", ["English", "தமிழ் (Tamil)"], index=0)
     st.markdown("---")
     # Add Gandhi image
-    st.image("gandhi.jpg", use_column_container=True, caption="Mahatma Gandhi")
+    st.image("gandhi.jpg", use_column_container_width=True, caption="Mahatma Gandhi")
 
 # Main content
 st.markdown("## Police Assistance Cell")
