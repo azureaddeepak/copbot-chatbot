@@ -3,7 +3,6 @@
 import streamlit as st
 import pandas as pd
 import os
-import time
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -238,9 +237,6 @@ with btn_col4:
 **📞 Phone:** {station['phone']}
 **🗺️ Jurisdiction:** {station['jurisdiction']}
 """)
-                time.sleep(60)  # ✅ Wait 60 seconds (1 minute)
-                st.session_state.show_police_search = False
-                st.rerun()
             else:
                 st.warning(f"⚠️ No exact match for '{area_clean}'. Try these nearby areas:")
                 suggestions = list(chennai_police_stations.keys())[:5]
@@ -295,42 +291,46 @@ user_query = st.text_input(
 )
 
 if user_query and st.session_state.vectorstore:
-    with st.spinner("🤔 CopBot is thinking... (Gemini AI)"):
-        retriever = st.session_state.vectorstore.as_retriever(search_kwargs={"k": 3})
-
-        template = """You are 'CopBot', the official AI assistant of Chennai District Police.
-        Answer the question based ONLY on the context provided.
-        If unsure, say "I cannot answer based on official data."
-        Keep response clear, concise, and citizen-friendly.
-        Respond in the SAME LANGUAGE as the question.
-
-        Context: {context}
-
-        Question: {question}
-
-        Answer:"""
-
-        prompt = ChatPromptTemplate.from_template(template)
-        
-        # ✅ SECURE: Use API key from Streamlit Secrets
-        llm = ChatGoogleGenerativeAI(
-            model="gemini-1.5-flash",
-            google_api_key=st.secrets["GEMINI_API_KEY"],
-            temperature=0,
-            convert_system_message_to_human=True
-        )
-        
-        chain = (
-            {"context": retriever, "question": RunnablePassthrough()}
-            | prompt
-            | llm
-            | StrOutputParser()
-        )
-
-        response = chain.invoke(user_query)
-
+    if user_query.lower() in ["hi", "hello", "hey"]:
         st.markdown("### 🤖 CopBot Response:")
-        st.info(response)
+        st.success("Hello! I am the Chennai District Police Assistance Bot. How can I help you today?")
+    else:
+        with st.spinner("🤔 CopBot is thinking... (Gemini AI)"):
+            retriever = st.session_state.vectorstore.as_retriever(search_kwargs={"k": 3})
+
+            template = """You are 'CopBot', the official AI assistant of Chennai District Police.
+            Answer the question based ONLY on the context provided.
+            If unsure, say "I cannot answer based on official data."
+            Keep response clear, concise, and citizen-friendly.
+            Respond in the SAME LANGUAGE as the question.
+
+            Context: {context}
+
+            Question: {question}
+
+            Answer:"""
+
+            prompt = ChatPromptTemplate.from_template(template)
+            
+            # ✅ SECURE: Use API key from Streamlit Secrets
+            llm = ChatGoogleGenerativeAI(
+                model="gemini-1.5-flash",
+                google_api_key=st.secrets["GEMINI_API_KEY"],
+                temperature=0,
+                convert_system_message_to_human=True
+            )
+            
+            chain = (
+                {"context": retriever, "question": RunnablePassthrough()}
+                | prompt
+                | llm
+                | StrOutputParser()
+            )
+
+            response = chain.invoke(user_query)
+
+            st.markdown("### 🤖 CopBot Response:")
+            st.info(response)
 
 # Footer
 st.markdown("---")
