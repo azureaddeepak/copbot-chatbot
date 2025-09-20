@@ -1,4 +1,3 @@
-
 # app.py - CopBotChatbox: Chennai Police Assistant (GEMINI MODE - SECURE)
 
 import streamlit as st
@@ -230,18 +229,18 @@ with btn_col4:
 
         if area.strip():
             area_clean = area.strip().title()
-         if area_clean in chennai_police_stations:
-    station = chennai_police_stations[area_clean]
-    with st.expander("✅ Station Found", expanded=True):
-        st.success(f"""
-**📍 {station['name']}**
+            if area_clean in chennai_police_stations:
+                station = chennai_police_stations[area_clean]
+                with st.expander("✅ Station Found", expanded=True):
+                    st.success(f"""
+**📍 {station['name']}
 **🏠 Address:** {station['address']}
 **📞 Phone:** {station['phone']}
 **🗺️ Jurisdiction:** {station['jurisdiction']}
 """)
-    time.sleep(60)  # ✅ Wait 60 seconds (1 minute)
-    st.session_state.show_police_search = False
-    st.rerun()
+                time.sleep(60)  # ✅ Wait 60 seconds (1 minute)
+                st.session_state.show_police_search = False
+                st.rerun()
             else:
                 st.warning(f"⚠️ No exact match for '{area_clean}'. Try these nearby areas:")
                 suggestions = list(chennai_police_stations.keys())[:5]
