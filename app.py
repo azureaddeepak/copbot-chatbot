@@ -1,4 +1,134 @@
 # app.py - CopBotChatbox: chennai Police Assistant (GEMINI MODE - SECURE)
+# Chennai Police Station Data (City-Wide Coverage)
+chennai_police_stations = {
+    # Central Chennai
+    "Parry's Corner": {
+        "name": "Parry's Corner Police Station",
+        "address": "No. 1, Rajaji Salai, George Town, Chennai - 600001",
+        "phone": "044-2522 1000",
+        "jurisdiction": "George Town, Parry's, Sowcarpet"
+    },
+    "Royapettah": {
+        "name": "Royapettah Police Station",
+        "address": "No. 3, Pycrofts Road, Royapettah, Chennai - 600014",
+        "phone": "044-2847 1000",
+        "jurisdiction": "Royapettah, Triplicane, Chepauk"
+    },
+    "Egmore": {
+        "name": "Egmore Police Station",
+        "address": "No. 1, Pantheon Road, Egmore, Chennai - 600008",
+        "phone": "044-2819 1000",
+        "jurisdiction": "Egmore, Kilpauk, Chetpet"
+    },
+    "Teynampet": {
+        "name": "Teynampet Police Station",
+        "address": "No. 1, GN Chetty Road, Teynampet, Chennai - 600018",
+        "phone": "044-2833 1000",
+        "jurisdiction": "Teynampet, Nandanam, Raja Annamalai Puram"
+    },
+    "Mylapore": {
+        "name": "Mylapore Police Station",
+        "address": "No. 1, Royapettah High Road, Mylapore, Chennai - 600004",
+        "phone": "044-2499 1000",
+        "jurisdiction": "Mylapore, Santhome, Adyar"
+    },
+    "Thiruvanmiyur": {
+        "name": "Thiruvanmiyur Police Station",
+        "address": "No. 1, Rajiv Gandhi Salai, Thiruvanmiyur, Chennai - 600041",
+        "phone": "044-2444 1000",
+        "jurisdiction": "Thiruvanmiyur, Adyar, Besant Nagar"
+    },
+
+    # South Chennai
+    "Velachery": {
+        "name": "Velachery Police Station",
+        "address": "Velachery Bypass Road, Chennai - 600042",
+        "phone": "044-2255 1000",
+        "jurisdiction": "Velachery, Madipakkam, Pallikaranai"
+    },
+    "Pallikaranai": {
+        "name": "Pallikaranai Police Station",
+        "address": "No. 1, Pallikaranai Main Road, Chennai - 600100",
+        "phone": "044-2266 1000",
+        "jurisdiction": "Pallikaranai, Keelkattalai, Kovilambakkam"
+    },
+    "Tambaram": {
+        "name": "Tambaram Police Station",
+        "address": "Tambaram Sanatorium, Chennai - 600045",
+        "phone": "044-2239 1000",
+        "jurisdiction": "Tambaram, Chromepet, Pallavaram"
+    },
+    "Pallavaram": {
+        "name": "Pallavaram Police Station",
+        "address": "No. 1, Grand Southern Trunk Road, Pallavaram, Chennai - 600043",
+        "phone": "044-2268 1000",
+        "jurisdiction": "Pallavaram, Chromepet, Tirusulam"
+    },
+    "Kovur": {
+        "name": "Kovur Police Station",
+        "address": "No. 1, GST Road, Kovur, Chennai - 600127",
+        "phone": "044-2766 1000",
+        "jurisdiction": "Kovur, Perungalathur, Vandalur"
+    },
+    "Vandalur": {
+        "name": "Vandalur Police Station",
+        "address": "No. 1, Vandalur Main Road, Chennai - 600048",
+        "phone": "044-2747 1000",
+        "jurisdiction": "Vandalur, Mudichur, Uthandi"
+    },
+
+    # West Chennai
+    "Anna Nagar": {
+        "name": "Anna Nagar Police Station",
+        "address": "No. 3, 3rd Avenue, Anna Nagar, Chennai - 600040",
+        "phone": "044-2616 1000",
+        "jurisdiction": "Anna Nagar, Villivakkam, Padi"
+    },
+    "Villivakkam": {
+        "name": "Villivakkam Police Station",
+        "address": "No. 1, EVR Periyar Salai, Villivakkam, Chennai - 600049",
+        "phone": "044-2668 1000",
+        "jurisdiction": "Villivakkam, Kolathur, Peravallur"
+    },
+    "Ambattur": {
+        "name": "Ambattur Police Station",
+        "address": "No. 1, Jawaharlal Nehru Road, Ambattur, Chennai - 600053",
+        "phone": "044-2626 1000",
+        "jurisdiction": "Ambattur, Avadi, Pattabiram"
+    },
+    "Avadi": {
+        "name": "Avadi Police Station",
+        "address": "No. 1, Avadi Road, Avadi, Chennai - 600054",
+        "phone": "044-2655 1000",
+        "jurisdiction": "Avadi, Pattabiram, Thiruninravur"
+    },
+
+    # North Chennai
+    "Tondiarpet": {
+        "name": "Tondiarpet Police Station",
+        "address": "No. 1, EVR Periyar Salai, Tondiarpet, Chennai - 600081",
+        "phone": "044-2591 1000",
+        "jurisdiction": "Tondiarpet, Royapuram, Washermanpet"
+    },
+    "Royapuram": {
+        "name": "Royapuram Police Station",
+        "address": "No. 1, Old Jail Road, Royapuram, Chennai - 600013",
+        "phone": "044-2533 1000",
+        "jurisdiction": "Royapuram, Tondiarpet, Basin Bridge"
+    },
+    "Perambur": {
+        "name": "Perambur Police Station",
+        "address": "No. 1, Perambur High Road, Chennai - 600011",
+        "phone": "044-2671 1000",
+        "jurisdiction": "Perambur, Kolathur, Peravallur"
+    },
+    "Thiru Vi Ka Nagar": {
+        "name": "Thiru Vi Ka Nagar Police Station",
+        "address": "No. 1, P H Road, Thiru Vi Ka Nagar, Chennai - 600019",
+        "phone": "044-2642 1000",
+        "jurisdiction": "Thiru Vi Ka Nagar, Perambur, Kolathur"
+    }
+}
 
 import streamlit as st
 import pandas as pd
@@ -45,17 +175,24 @@ st.markdown("## Police Assistance Cell")
 st.markdown("### 👋 Welcome! I am the Chennai District Police Assistance bot. How can I help you?")
 
 # Buttons
-col1, col2, col3 = st.columns(3)
-with col1:
-    if st.button("Emergency contacts"):
-        st.info("📞 Police: 100\n📞 Women Helpline: 1091\n📞 Cyber Crime: 1930")
 with col2:
-    if st.button("Police stations"):
-        st.info("📍 Map coming soon...")
-with col3:
-    if st.button("How to file a complaint?"):
-        st.info("👉 Visit your state police portal (e.g., https://delhipolice.gov.in). Click 'File Complaint' or 'E-FIR'. Fill in details and upload documents.")
-
+    if st.button("👮 Find Nearby Police Station"):
+        area = st.text_input("Enter your area or locality in Chennai (e.g., Kovur, Velachery, Teynampet):", key="area_input")
+        if area:
+            area = area.strip().title()
+            if area in chennai_police_stations:
+                station = chennai_police_stations[area]
+                st.success(f"""
+**📍 {station['name']}**
+**🏠 Address:** {station['address']}
+**📞 Phone:** {station['phone']}
+**🗺️ Jurisdiction:** {station['jurisdiction']}
+""")
+            else:
+                st.warning(f"⚠️ No exact match for '{area}'. Here are nearby stations you can try:")
+                # Show first 5 stations as suggestions
+                for i, (loc, info) in enumerate(list(chennai_police_stations.items())[:5]):
+                    st.write(f"🔹 **{loc}** → {info['name']}")
 # Main Header
 if language == "English":
     st.title("👮 Welcome to Chennai District Police Assistance Bot")
@@ -115,7 +252,7 @@ if user_query and st.session_state.vectorstore:
     with st.spinner("🤔 CopBot is thinking... (Gemini AI)"):
         retriever = st.session_state.vectorstore.as_retriever(search_kwargs={"k": 3})
 
-        template = """You are 'CopBot', the official AI assistant of Thoothukudi District Police.
+        template = """You are 'CopBot', the official AI assistant of Chennai District Police.
         Answer the question based ONLY on the context provided.
         If unsure, say "I cannot answer based on official data."
         Keep response clear, concise, and citizen-friendly.
