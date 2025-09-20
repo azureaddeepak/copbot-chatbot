@@ -51,7 +51,7 @@ chennai_police_stations = {
         "jurisdiction": "Mylapore, Santhome, Adyar"
     }
 }
-"Thiruvanmiyur": {
+    "Thiruvanmiyur": {
     "name": "Thiruvanmiyur Police Station",
     "address": "No. 1, Thiruvanmiyur High Road, Thiruvanmiyur, Chennai - 600037",
     "phone": "044-2835 1000",
