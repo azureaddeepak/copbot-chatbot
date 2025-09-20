@@ -156,6 +156,9 @@ st.set_page_config(
     layout="wide"
 )
 
+# Add Gandhi image to left sidebar
+st.sidebar.image("gandhi.jpg", use_column_width=True, caption="Mahatma Gandhi")
+
 # Custom CSS for design
 st.markdown("""
 <style>
