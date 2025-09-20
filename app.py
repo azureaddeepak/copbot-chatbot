@@ -26,14 +26,12 @@ chennai_police_stations = {
         "phone": "044-2522 1000",
         "jurisdiction": "George Town, Parry's, Sowcarpet"
     },
-    # ... rest of stations
-}
-"Royapettah": {
-    "name": "Royapettah Police Station",
-    "address": "No. 3, Pycrofts Road, Royapettah, Chennai - 600014",
-    "phone": "044-2847 1000",
-    "jurisdiction": "Royapettah, Triplicane, Chepauk"
-},
+    "Royapettah": {
+        "name": "Royapettah Police Station",
+        "address": "No. 3, Pycrofts Road, Royapettah, Chennai - 600014",
+        "phone": "044-2847 1000",
+        "jurisdiction": "Royapettah, Triplicane, Chepauk"
+    },
     "Egmore": {
         "name": "Egmore Police Station",
         "address": "No. 1, Pantheon Road, Egmore, Chennai - 600008",
@@ -51,7 +49,8 @@ chennai_police_stations = {
         "address": "No. 1, Royapettah High Road, Mylapore, Chennai - 600004",
         "phone": "044-2499 1000",
         "jurisdiction": "Mylapore, Santhome, Adyar"
-    },
+    }
+}
     "Thiruvanmiyur": {
         "name": "Thiruvanmiyur Police Station",
         "address": "No. 1, Rajiv Gandhi Salai, Thiruvanmiyur, Chennai - 600041",
