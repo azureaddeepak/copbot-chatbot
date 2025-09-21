@@ -235,88 +235,88 @@ with btn_col3:
 👉 **Documents Needed**: ID Proof, Address Proof, Incident Details, Photos/Videos (if any)
 """)
 
-with btn_col4:
-    if st.button("📍 Find Nearby Police Station", use_container_width=True):
-        st.session_state.show_police_search = not st.session_state.show_police_search
+# Remove the "Find Nearby Police Station" button
+# with btn_col4:
+#     if st.button("📍 Find Nearby Police Station", use_container_width=True):
+#         st.session_state.show_police_search = not st.session_state.show_police_search
 
-# Police Station Search Section — SMALL RIGHT-ALIGNED SEARCH BAR
-if st.session_state.show_police_search:
-    st.markdown("### 🔍 Search Police Station by Area")
+# Search Box for Any Location in Chennai
+st.markdown("### 🔍 Search Police Station by Area")
 
-    # Use columns to push search to right
-    col1, col2 = st.columns([3, 1])
+# Use columns to push search to right
+col1, col2 = st.columns([3, 1])
 
-    with col2:
-        # Only one input box — visual only
-        html_code = """
-        <div style="display: flex; align-items: center; gap: 8px;">
-            <input 
-                type="text" 
-                id="area-input" 
-                placeholder="e.g., Velachery, Kovur"
-                style="width: 300px; padding: 8px; border: 2px solid #1f77b4; border-radius: 4px; font-size: 14px;"
-                value="%s"
-                oninput="document.getElementById('area-input').value.trim() ? st.session_state.area_input = document.getElementById('area-input').value : null;"
-            >
-            <button 
-                onclick="document.getElementById('area-input').value.trim() && document.getElementById('search-btn').click()"
-                style="background-color: #1f77b4; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;"
-            >
-                🔍 Search
-            </button>
-        </div>
-        """ % (st.session_state.searched_area if st.session_state.searched_area else "")
+with col2:
+    # Only one input box — visual only
+    html_code = """
+    <div style="display: flex; align-items: center; gap: 8px;">
+        <input 
+            type="text" 
+            id="area-input" 
+            placeholder="e.g., Velachery, Kovur, Chennai"
+            style="width: 300px; padding: 8px; border: 2px solid #1f77b4; border-radius: 4px; font-size: 14px;"
+            value="%s"
+            oninput="document.getElementById('area-input').value.trim() ? st.session_state.area_input = document.getElementById('area-input').value : null;"
+        >
+        <button 
+            onclick="document.getElementById('area-input').value.trim() && document.getElementById('search-btn').click()"
+            style="background-color: #1f77b4; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;"
+        >
+            🔍 Search
+        </button>
+    </div>
+    """ % (st.session_state.searched_area if st.session_state.searched_area else "")
 
-        st.components.v1.html(html_code, height=50)
+    st.components.v1.html(html_code, height=50)
 
-        # Trigger search
-        if st.button("🔍 Search", key="search_btn", type="primary"):
-            area = st.session_state.get("area_input", "").strip()
-            if area:
-                area_clean = area.title()
-                if area_clean in chennai_police_stations:
-                    st.session_state.searched_area = area_clean
-                    st.session_state.police_result = chennai_police_stations[area_clean]
+    # Trigger search
+    if st.button("🔍 Search", key="search_btn", type="primary"):
+        area = st.session_state.get("area_input", "").strip()
+        if area:
+            area_clean = area.title()
+            if area_clean in chennai_police_stations:
+                st.session_state.searched_area = area_clean
+                st.session_state.police_result = chennai_police_stations[area_clean]
+                st.session_state.result_shown = True
+                st.session_state.result_start_time = datetime.now()
+            else:
+                matches = [loc for loc in chennai_police_stations.keys() if area.lower() in loc.lower()]
+                if matches:
+                    st.session_state.searched_area = matches[0]
+                    st.session_state.police_result = chennai_police_stations[matches[0]]
                     st.session_state.result_shown = True
                     st.session_state.result_start_time = datetime.now()
                 else:
-                    matches = [loc for loc in chennai_police_stations.keys() if area.lower() in loc.lower()]
-                    if matches:
-                        st.session_state.searched_area = matches[0]
-                        st.session_state.police_result = chennai_police_stations[matches[0]]
-                        st.session_state.result_shown = True
-                        st.session_state.result_start_time = datetime.now()
-                    else:
-                        st.session_state.police_result = None
-                        st.session_state.result_shown = False
+                    st.session_state.police_result = None
+                    st.session_state.result_shown = False
 
-    # Auto-hide after 60 seconds
-    if st.session_state.police_result and st.session_state.result_shown:
-        elapsed = (datetime.now() - st.session_state.result_start_time).total_seconds()
-        if elapsed >= 60:
-            st.session_state.result_shown = False
-            st.session_state.result_start_time = None
+# Auto-hide after 60 seconds
+if st.session_state.police_result and st.session_state.result_shown:
+    elapsed = (datetime.now() - st.session_state.result_start_time).total_seconds()
+    if elapsed >= 60:
+        st.session_state.result_shown = False
+        st.session_state.result_start_time = None
 
-        if st.session_state.result_shown:
-            station = st.session_state.police_result
-            st.markdown(
-                f"""
-                <div style="background-color:#d4edda; padding:15px; border-radius:8px; margin-top:10px; border-left:5px solid #28a745;">
-                    <strong>📍 {station['name']}</strong><br>
-                    <strong>🏠 Address:</strong> {station['address']}<br>
-                    <strong>📞 Phone:</strong> {station['phone']}<br>
-                    <strong>🗺️ Jurisdiction:</strong> {station['jurisdiction']}
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+    if st.session_state.result_shown:
+        station = st.session_state.police_result
+        st.markdown(
+            f"""
+            <div style="background-color:#d4edda; padding:15px; border-radius:8px; margin-top:10px; border-left:5px solid #28a745;">
+                <strong>📍 {station['name']}</strong><br>
+                <strong>🏠 Address:</strong> {station['address']}<br>
+                <strong>📞 Phone:</strong> {station['phone']}<br>
+                <strong>🗺️ Jurisdiction:</strong> {station['jurisdiction']}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-    # Show suggestions if not found
-    elif not st.session_state.police_result and st.session_state.searched_area:
-        st.warning(f"⚠️ No exact match for '{st.session_state.searched_area}'. Try these nearby areas:")
-        suggestions = list(chennai_police_stations.keys())[:5]
-        for loc in suggestions:
-            st.write(f"🔹 **{loc}** → {chennai_police_stations[loc]['name']}")
+# Show suggestions if not found
+elif not st.session_state.police_result and st.session_state.searched_area:
+    st.warning(f"⚠️ No exact match for '{st.session_state.searched_area}'. Try these nearby areas:")
+    suggestions = list(chennai_police_stations.keys())[:5]
+    for loc in suggestions:
+        st.write(f"🔹 **{loc}** → {chennai_police_stations[loc]['name']}")
 
 # Load data from Excel (only once)
 @st.cache_data
