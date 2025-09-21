@@ -1,5 +1,3 @@
-# app.py - CopBotChatbox: Chennai Police Assistant (GEMINI MODE - SECURE)
-
 import streamlit as st
 import pandas as pd
 import os
@@ -12,22 +10,6 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from datetime import datetime
 
 # Initialize session state
-if "show_police_search" not in st.session_state:
-    st.session_state.show_police_search = False
-
-if "searched_area" not in st.session_state:
-    st.session_state.searched_area = ""
-
-if "area_input" not in st.session_state:
-    st.session_state.area_input = ""
-
-if "police_result" not in st.session_state:
-    st.session_state.police_result = None
-if "result_shown" not in st.session_state:
-    st.session_state.result_shown = False
-if "result_start_time" not in st.session_state:
-    st.session_state.result_start_time = None
-
 if "vectorstore" not in st.session_state:
     st.session_state.vectorstore = None
 if "data_loaded" not in st.session_state:
@@ -235,89 +217,6 @@ with btn_col3:
 👉 **Documents Needed**: ID Proof, Address Proof, Incident Details, Photos/Videos (if any)
 """)
 
-# Remove the "Find Nearby Police Station" button
-# with btn_col4:
-#     if st.button("📍 Find Nearby Police Station", use_container_width=True):
-#         st.session_state.show_police_search = not st.session_state.show_police_search
-
-# Search Box for Any Location in Chennai
-st.markdown("### 🔍 Search Police Station by Area")
-
-# Use columns to push search to right
-col1, col2 = st.columns([3, 1])
-
-with col2:
-    # Only one input box — visual only
-    html_code = """
-    <div style="display: flex; align-items: center; gap: 8px;">
-        <input 
-            type="text" 
-            id="area-input" 
-            placeholder="e.g., Velachery, Kovur, Chennai"
-            style="width: 300px; padding: 8px; border: 2px solid #1f77b4; border-radius: 4px; font-size: 14px;"
-            value="%s"
-            oninput="document.getElementById('area-input').value.trim() ? st.session_state.area_input = document.getElementById('area-input').value : null;"
-        >
-        <button 
-            onclick="document.getElementById('area-input').value.trim() && document.getElementById('search-btn').click()"
-            style="background-color: #1f77b4; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;"
-        >
-            🔍 Search
-        </button>
-    </div>
-    """ % (st.session_state.searched_area if st.session_state.searched_area else "")
-
-    st.components.v1.html(html_code, height=50)
-
-    # Trigger search
-    if st.button("🔍 Search", key="search_btn", type="primary"):
-        area = st.session_state.get("area_input", "").strip()
-        if area:
-            area_clean = area.title()
-            if area_clean in chennai_police_stations:
-                st.session_state.searched_area = area_clean
-                st.session_state.police_result = chennai_police_stations[area_clean]
-                st.session_state.result_shown = True
-                st.session_state.result_start_time = datetime.now()
-            else:
-                matches = [loc for loc in chennai_police_stations.keys() if area.lower() in loc.lower()]
-                if matches:
-                    st.session_state.searched_area = matches[0]
-                    st.session_state.police_result = chennai_police_stations[matches[0]]
-                    st.session_state.result_shown = True
-                    st.session_state.result_start_time = datetime.now()
-                else:
-                    st.session_state.police_result = None
-                    st.session_state.result_shown = False
-
-# Auto-hide after 60 seconds
-if st.session_state.police_result and st.session_state.result_shown:
-    elapsed = (datetime.now() - st.session_state.result_start_time).total_seconds()
-    if elapsed >= 60:
-        st.session_state.result_shown = False
-        st.session_state.result_start_time = None
-
-    if st.session_state.result_shown:
-        station = st.session_state.police_result
-        st.markdown(
-            f"""
-            <div style="background-color:#d4edda; padding:15px; border-radius:8px; margin-top:10px; border-left:5px solid #28a745;">
-                <strong>📍 {station['name']}</strong><br>
-                <strong>🏠 Address:</strong> {station['address']}<br>
-                <strong>📞 Phone:</strong> {station['phone']}<br>
-                <strong>🗺️ Jurisdiction:</strong> {station['jurisdiction']}
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-# Show suggestions if not found
-elif not st.session_state.police_result and st.session_state.searched_area:
-    st.warning(f"⚠️ No exact match for '{st.session_state.searched_area}'. Try these nearby areas:")
-    suggestions = list(chennai_police_stations.keys())[:5]
-    for loc in suggestions:
-        st.write(f"🔹 **{loc}** → {chennai_police_stations[loc]['name']}")
-
 # Load data from Excel (only once)
 @st.cache_data
 def load_data():
@@ -386,63 +285,6 @@ if not st.session_state.data_loaded:
             st.error(f"❌ Failed to load embeddings: {e}")
             st.stop()
 
-# Chat interface
-st.markdown("### 💬 Ask Your Question")
-
-user_query = st.text_input(
-    "Type your question here..." if language == "English" else "உங்கள் கேள்வியை இங்கே தட்டச்சு செய்யவும்...",
-    placeholder="E.g., How to file FIR?" if language == "English" else "எ.கா., எஃப்ஐஆர் எப்படி பதிவு செய்வது?"
-)
-
-if user_query and hasattr(st.session_state, 'vectorstore') and st.session_state.vectorstore:
-    if user_query.lower() in ["hi", "hello", "hey"]:
-        st.markdown("### 🤖 CopBot Response:")
-        st.success("Hello! I am the Chennai District Police Assistance Bot. How can I help you today?")
-    else:
-        with st.spinner("🤔 CopBot is thinking... (Gemini AI)"):
-            # Simulate retriever
-            docs = st.session_state.vectorstore.similarity_search(user_query, k=3)
-            context = "\n".join([doc["page_content"] for doc in docs])
-
-            template = """You are 'CopBot', the official AI assistant of Chennai District Police.
-            Answer the question based ONLY on the context provided.
-            If unsure, say "I cannot answer based on official data."
-            Keep response clear, concise, and citizen-friendly.
-            Respond in the SAME LANGUAGE as the question.
-
-            Context: {context}
-
-            Question: {question}
-
-            Answer:"""
-
-            prompt = ChatPromptTemplate.from_template(template)
-            
-            # ✅ SECURE: Use API key from Streamlit Secrets
-            try:
-                llm = ChatGoogleGenerativeAI(
-                    model="gemini-1.5-flash",
-                    google_api_key=st.secrets["GEMINI_API_KEY"],
-                    temperature=0,
-                    convert_system_message_to_human=True
-                )
-            except Exception as e:
-                st.error(f"❌ Gemini API error: {e}")
-                st.stop()
-
-            chain = (
-                {"context": lambda x: context, "question": RunnablePassthrough()}
-                | prompt
-                | llm
-                | StrOutputParser()
-            )
-
-            try:
-                response = chain.invoke(user_query)
-                st.markdown("### 🤖 CopBot Response:")
-                st.info(response)
-            except Exception as e:
-                st.error(f"❌ Error generating response: {e}")
 
 # Footer
 st.markdown("---")
