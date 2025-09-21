@@ -3,14 +3,12 @@
 import streamlit as st
 import pandas as pd
 import os
-from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain_google_genai import ChatGoogleGenerativeAI
-import time
 from datetime import datetime
 
 # Initialize session state for police station search
@@ -31,8 +29,6 @@ if "police_result" not in st.session_state:
     st.session_state.police_result = None
 if "result_shown" not in st.session_state:
     st.session_state.result_shown = False
-if "result_timestamp" not in st.session_state:
-    st.session_state.result_timestamp = None
 
 # Chennai Police Station Data (City-Wide Coverage)
 chennai_police_stations = {
@@ -185,19 +181,28 @@ st.markdown("""
 # Add logo and title
 col1, col2 = st.columns([1, 4])
 with col1:
-    st.image("tn_logo.png", width=90)
+    try:
+        st.image("tn_logo.png", width=90)
+    except:
+        st.write("🖼️ Logo")
 with col2:
     st.title("👮 Chennai District Police Assistance Bot")
 
 # Language toggle in sidebar
 with st.sidebar:
-    st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Police_India.svg/1200px-Police_India.svg.png", width=100)
+    try:
+        st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Police_India.svg/1200px-Police_India.svg.png", width=100)
+    except:
+        st.write("🖼️ Police Icon")
     st.title("👮 CopBotChatbox")
     st.markdown("### Chennai District Police")
     language = st.radio("Select Language / மொழியைத் தர்ந்தெடுக்கவும்", ["English", "தமிழ் (Tamil)"], index=0)
     st.markdown("---")
     # Add Gandhi image
-    st.image("gandhi.jpg", use_container_width=True, caption="Mahatma Gandhi")
+    try:
+        st.image("gandhi.jpg", use_container_width=True, caption="Mahatma Gandhi")
+    except:
+        st.caption("Mahatma Gandhi")
 
 # Main content
 st.markdown("## Police Assistance Cell")
@@ -272,9 +277,10 @@ if st.session_state.show_police_search:
                     var card = document.getElementById('result-card');
                     if (card) {{
                         card.style.opacity = '0';
+                        card.style.transition = 'opacity 0.5s ease';
                         setTimeout(function() {{
                             card.style.display = 'none';
-                        }}, 500); // fade out before hide
+                        }}, 500);
                     }}
                 }}, 60000); // 60 seconds
             </script>
@@ -291,12 +297,19 @@ if st.session_state.show_police_search:
 # Load data from Excel (only once)
 @st.cache_data
 def load_data():
-    df = pd.read_excel("Chatbot_Data.xlsx")
-    return df
+    try:
+        df = pd.read_excel("Chatbot_Data.xlsx")
+        return df
+    except Exception as e:
+        st.error(f"❌ Could not load Chatbot_Data.xlsx: {e}")
+        return None
 
 if not st.session_state.data_loaded:
     with st.spinner("Loading official police data... (Powered by Gemini)"):
         df = load_data()
+        if df is None:
+            st.stop()
+
         # Prepare text for RAG
         df['combined_text'] = (
             "Category: " + df['Category'].astype(str) + " | " +
@@ -313,13 +326,42 @@ if not st.session_state.data_loaded:
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
         chunks = text_splitter.split_text(full_text)
 
-        # Create local embeddings
-        embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-        vectorstore = FAISS.from_texts(chunks, embeddings)
+        # Use SentenceTransformer directly (CPU-safe)
+        try:
+            from sentence_transformers import SentenceTransformer
+            import numpy as np
 
-        st.session_state.vectorstore = vectorstore
-        st.session_state.data_loaded = True
-        st.success("✅ Official Police Knowledge Base Loaded!")
+            # Force CPU usage
+            model = SentenceTransformer("all-MiniLM-L6-v2", device="cpu")
+            st.write("🧠 Encoding knowledge base...")
+            vectors = model.encode(chunks, show_progress_bar=False, device="cpu")
+
+            # Create FAISS index
+            dimension = vectors.shape[1]
+            from faiss import IndexFlatL2
+            index = IndexFlatL2(dimension)
+            index.add(vectors.astype('float32'))
+
+            # Wrap into LangChain-compatible retriever
+            class SimpleVectorStore:
+                def __init__(self, index, texts, model):
+                    self.index = index
+                    self.texts = texts
+                    self.model = model
+
+                def similarity_search(self, query, k=3):
+                    query_vec = self.model.encode([query], device="cpu").astype('float32')
+                    distances, indices = self.index.search(query_vec, k)
+                    results = [self.texts[i] for i in indices[0]]
+                    return [{"page_content": r} for r in results]
+
+            st.session_state.vectorstore = SimpleVectorStore(index, chunks, model)
+            st.session_state.data_loaded = True
+            st.success("✅ Official Police Knowledge Base Loaded!")
+
+        except Exception as e:
+            st.error(f"❌ Failed to load embeddings: {e}")
+            st.stop()
 
 # Chat interface
 st.markdown("### 💬 Ask Your Question")
@@ -329,13 +371,15 @@ user_query = st.text_input(
     placeholder="E.g., How to file FIR?" if language == "English" else "எ.கா., எஃப்ஐஆர் எப்படி பதிவு செய்வது?"
 )
 
-if user_query and st.session_state.vectorstore:
+if user_query and hasattr(st.session_state, 'vectorstore') and st.session_state.vectorstore:
     if user_query.lower() in ["hi", "hello", "hey"]:
         st.markdown("### 🤖 CopBot Response:")
         st.success("Hello! I am the Chennai District Police Assistance Bot. How can I help you today?")
     else:
         with st.spinner("🤔 CopBot is thinking... (Gemini AI)"):
-            retriever = st.session_state.vectorstore.as_retriever(search_kwargs={"k": 3})
+            # Simulate retriever
+            docs = st.session_state.vectorstore.similarity_search(user_query, k=3)
+            context = "\n".join([doc["page_content"] for doc in docs])
 
             template = """You are 'CopBot', the official AI assistant of Chennai District Police.
             Answer the question based ONLY on the context provided.
@@ -352,24 +396,30 @@ if user_query and st.session_state.vectorstore:
             prompt = ChatPromptTemplate.from_template(template)
             
             # ✅ SECURE: Use API key from Streamlit Secrets
-            llm = ChatGoogleGenerativeAI(
-                model="gemini-1.5-flash",
-                google_api_key=st.secrets["GEMINI_API_KEY"],
-                temperature=0,
-                convert_system_message_to_human=True
-            )
-            
+            try:
+                llm = ChatGoogleGenerativeAI(
+                    model="gemini-1.5-flash",
+                    google_api_key=st.secrets["GEMINI_API_KEY"],
+                    temperature=0,
+                    convert_system_message_to_human=True
+                )
+            except Exception as e:
+                st.error(f"❌ Gemini API error: {e}")
+                st.stop()
+
             chain = (
-                {"context": retriever, "question": RunnablePassthrough()}
+                {"context": lambda x: context, "question": RunnablePassthrough()}
                 | prompt
                 | llm
                 | StrOutputParser()
             )
 
-            response = chain.invoke(user_query)
-
-            st.markdown("### 🤖 CopBot Response:")
-            st.info(response)
+            try:
+                response = chain.invoke(user_query)
+                st.markdown("### 🤖 CopBot Response:")
+                st.info(response)
+            except Exception as e:
+                st.error(f"❌ Error generating response: {e}")
 
 # Footer
 st.markdown("---")
