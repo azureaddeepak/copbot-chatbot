@@ -188,7 +188,7 @@ with st.sidebar:
     except:
         st.caption("Mahatma Gandhi")
 
-tab1, tab2, tab3, tab4 = st.tabs(["Home", "🚨 Emergency Contacts", "📝 How to File Complaint?", "👮 Nearby Police Stations"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["Home", "🚨 Emergency Contacts", "📝 How to File Complaint?", "👮 Nearby Police Stations", "💬 Chat with CopBot"])
 
 with tab1:
     # Welcome
@@ -263,8 +263,9 @@ if not st.session_state.data_loaded:
             st.error(f"❌ Failed to load embeddings: {e}")
             st.stop()
 
-    # Chat interface
-    st.markdown("### 💬 Ask Your Question")
+with tab5:
+    st.markdown("## 💬 Chat with CopBot")
+    st.markdown("### Ask Your Question")
 
     user_query = st.text_input(
         "Type your question here..." if language == "English" else "உங்கள் கேள்வியை இங்கே தட்டச்சு செய்யவும்...",
