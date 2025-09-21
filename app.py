@@ -239,60 +239,64 @@ with btn_col4:
     if st.button("📍 Find Nearby Police Station", use_container_width=True):
         st.session_state.show_police_search = not st.session_state.show_police_search
 
-# Police Station Search Section — AUTO-HIDE AFTER 60 SECONDS
+# Police Station Search Section — SMALL SEARCH BAR ON RIGHT
 if st.session_state.show_police_search:
     st.markdown("### 🔍 Search Police Station by Area")
-    area = st.text_input(
-        "Enter your area (e.g., Kovur, Velachery, Teynampet):",
-        value=st.session_state.searched_area,
-        key="area_input_unique",
-        placeholder="Type your locality and press Enter..."
-    )
-    st.session_state.searched_area = area
 
-    if area.strip():
-        area_clean = area.strip().title()
-        result = None
-        if area_clean in chennai_police_stations:
-            result = chennai_police_stations[area_clean]
-        
-        # Store result and reset timer
-        if result:
-            st.session_state.police_result = result
-            st.session_state.result_shown = True
-            st.session_state.result_start_time = datetime.now()  # Reset timer
-        else:
-            st.session_state.police_result = None
+    # Create two columns: left (empty), right (search bar + button)
+    col1, col2 = st.columns([3, 1])  # Left takes 3/4, right takes 1/4
+
+    with col2:
+        area = st.text_input(
+            "Enter your area:",
+            value=st.session_state.searched_area,
+            key="area_input_unique",
+            placeholder="e.g., Velachery, Kovur",
+            label_visibility="hidden",
+            max_chars=30,
+            style={"width": "300px"}
+        )
+        st.session_state.searched_area = area
+
+        # Search button
+        if st.button("🔍 Search", key="search_btn"):
+            if area.strip():
+                area_clean = area.strip().title()
+                if area_clean in chennai_police_stations:
+                    st.session_state.police_result = chennai_police_stations[area_clean]
+                    st.session_state.result_shown = True
+                    st.session_state.result_start_time = datetime.now()
+                else:
+                    st.session_state.police_result = None
+                    st.session_state.result_shown = False
+
+    # Auto-hide after 60 seconds
+    if st.session_state.police_result and st.session_state.result_shown:
+        elapsed = (datetime.now() - st.session_state.result_start_time).total_seconds()
+        if elapsed >= 60:
             st.session_state.result_shown = False
+            st.session_state.result_start_time = None
 
-        # Auto-hide after 60 seconds
-        if st.session_state.police_result and st.session_state.result_shown:
-            elapsed = (datetime.now() - st.session_state.result_start_time).total_seconds()
-            if elapsed >= 60:
-                st.session_state.result_shown = False
-                st.session_state.result_start_time = None
+        if st.session_state.result_shown:
+            station = st.session_state.police_result
+            st.markdown(
+                f"""
+                <div style="background-color:#d4edda; padding:15px; border-radius:8px; margin-top:10px; border-left:5px solid #28a745;">
+                    <strong>📍 {station['name']}</strong><br>
+                    <strong>🏠 Address:</strong> {station['address']}<br>
+                    <strong>📞 Phone:</strong> {station['phone']}<br>
+                    <strong>🗺️ Jurisdiction:</strong> {station['jurisdiction']}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
-            # Display only if still active
-            if st.session_state.result_shown:
-                station = st.session_state.police_result
-                st.markdown(
-                    f"""
-                    <div style="background-color:#d4edda; padding:15px; border-radius:8px; margin-top:10px; border-left:5px solid #28a745;">
-                        <strong>📍 {station['name']}</strong><br>
-                        <strong>🏠 Address:</strong> {station['address']}<br>
-                        <strong>📞 Phone:</strong> {station['phone']}<br>
-                        <strong>🗺️ Jurisdiction:</strong> {station['jurisdiction']}
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-
-        # Show suggestions if not found
-        elif not st.session_state.police_result:
-            st.warning(f"⚠️ No exact match for '{area_clean}'. Try these nearby areas:")
-            suggestions = list(chennai_police_stations.keys())[:5]
-            for loc in suggestions:
-                st.write(f"🔹 **{loc}** → {chennai_police_stations[loc]['name']}")
+    # Show suggestions if not found
+    elif not st.session_state.police_result and area.strip():
+        st.warning(f"⚠️ No exact match for '{area}'. Try these nearby areas:")
+        suggestions = list(chennai_police_stations.keys())[:5]
+        for loc in suggestions:
+            st.write(f"🔹 **{loc}** → {chennai_police_stations[loc]['name']}")
 
 # Load data from Excel (only once)
 @st.cache_data
