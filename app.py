@@ -188,30 +188,29 @@ with st.sidebar:
     except:
         st.caption("Mahatma Gandhi")
 
-# Welcome
-st.markdown("## Police Assistance Cell")
-st.markdown("### 👋 Welcome! I am the Chennai District Police Assistance bot. How can I help you?")
+tab1, tab2 = st.tabs(["Home", "Nearby Police Stations"])
 
-# Quick Action Buttons
-btn_col1, btn_col2, btn_col3, btn_col4 = st.columns(4)
+with tab1:
+    # Welcome
+    st.markdown("## Police Assistance Cell")
+    st.markdown("### 👋 Welcome! I am the Chennai District Police Assistance bot. How can I help you?")
 
-with btn_col1:
-    if st.button("🚨 Emergency Contacts", use_container_width=True):
-        st.info("""
-📞 **Police**: 100  
-📞 **Women Helpline**: 1091  
-📞 **Cyber Crime**: 1930  
-📞 **Child Helpline**: 1098  
+    # Quick Action Buttons
+    btn_col1, btn_col2, btn_col3 = st.columns(3)
+
+    with btn_col1:
+        if st.button("🚨 Emergency Contacts", use_container_width=True):
+            st.info("""
+📞 **Police**: 100
+📞 **Women Helpline**: 1091
+📞 **Cyber Crime**: 1930
+📞 **Child Helpline**: 1098
 📞 **Ambulance/Fire**: 112
 """)
 
-with btn_col2:
-    if st.button("👮 Police Stations", use_container_width=True):
-        st.info("📍 **Interactive Map Coming Soon**\n\nMeanwhile, use 'Find Nearby Police Station' to search by area.")
-
-with btn_col3:
-    if st.button("📝 How to File Complaint?", use_container_width=True):
-        st.info("""
+    with btn_col2:
+        if st.button("📝 How to File Complaint?", use_container_width=True):
+            st.info("""
 👉 **Online**: Visit [Tamil Nadu Police Portal](https://www.tnpolice.gov.in) → Click 'e-FIR' or 'Complaint'\n
 👉 **Offline**: Visit nearest police station → Submit written complaint → Get stamped copy\n
 👉 **Documents Needed**: ID Proof, Address Proof, Incident Details, Photos/Videos (if any)
@@ -285,63 +284,82 @@ if not st.session_state.data_loaded:
             st.error(f"❌ Failed to load embeddings: {e}")
             st.stop()
 
-# Chat interface
-st.markdown("### 💬 Ask Your Question")
+    # Chat interface
+    st.markdown("### 💬 Ask Your Question")
 
-user_query = st.text_input(
-    "Type your question here..." if language == "English" else "உங்கள் கேள்வியை இங்கே தட்டச்சு செய்யவும்...",
-    placeholder="E.g., How to file FIR?" if language == "English" else "எ.கா., எஃப்ஐஆர் எப்படி பதிவு செய்வது?"
-)
+    user_query = st.text_input(
+        "Type your question here..." if language == "English" else "உங்கள் கேள்வியை இங்கே தட்டச்சு செய்யவும்...",
+        placeholder="E.g., How to file FIR?" if language == "English" else "எ.கா., எஃப்ஐஆர் எப்படி பதிவு செய்வது?"
+    )
 
-if user_query and hasattr(st.session_state, 'vectorstore') and st.session_state.vectorstore:
-    if user_query.lower() in ["hi", "hello", "hey"]:
-        st.markdown("### 🤖 CopBot Response:")
-        st.success("Hello! I am the Chennai District Police Assistance Bot. How can I help you today?")
-    else:
-        with st.spinner("🤔 CopBot is thinking... (Gemini AI)"):
-            # Simulate retriever
-            docs = st.session_state.vectorstore.similarity_search(user_query, k=3)
-            context = "\n".join([doc["page_content"] for doc in docs])
+    if user_query and hasattr(st.session_state, 'vectorstore') and st.session_state.vectorstore:
+        if user_query.lower() in ["hi", "hello", "hey"]:
+            st.markdown("### 🤖 CopBot Response:")
+            st.success("Hello! I am the Chennai District Police Assistance Bot. How can I help you today?")
+        else:
+            with st.spinner("🤔 CopBot is thinking... (Gemini AI)"):
+                # Simulate retriever
+                docs = st.session_state.vectorstore.similarity_search(user_query, k=3)
+                context = "\n".join([doc["page_content"] for doc in docs])
 
-            template = """You are 'CopBot', the official AI assistant of Chennai District Police.
-            Answer the question based ONLY on the context provided.
-            If unsure, say "I cannot answer based on official data."
-            Keep response clear, concise, and citizen-friendly.
-            Respond in the SAME LANGUAGE as the question.
+                template = """You are 'CopBot', the official AI assistant of Chennai District Police.
+                Answer the question based ONLY on the context provided.
+                If unsure, say "I cannot answer based on official data."
+                Keep response clear, concise, and citizen-friendly.
+                Respond in the SAME LANGUAGE as the question.
 
-            Context: {context}
+                Context: {context}
 
-            Question: {question}
+                Question: {question}
 
-            Answer:"""
+                Answer:"""
 
-            prompt = ChatPromptTemplate.from_template(template)
-            
-            # ✅ SECURE: Use API key from Streamlit Secrets
-            try:
-                llm = ChatGoogleGenerativeAI(
-                    model="gemini-1.5-flash",
-                    google_api_key=st.secrets["GEMINI_API_KEY"],
-                    temperature=0,
-                    convert_system_message_to_human=True
+                prompt = ChatPromptTemplate.from_template(template)
+                
+                # ✅ SECURE: Use API key from Streamlit Secrets
+                try:
+                    llm = ChatGoogleGenerativeAI(
+                        model="gemini-1.5-flash",
+                        google_api_key=st.secrets["GEMINI_API_KEY"],
+                        temperature=0,
+                        convert_system_message_to_human=True
+                    )
+                except Exception as e:
+                    st.error(f"❌ Gemini API error: {e}")
+                    st.stop()
+
+                chain = (
+                    {"context": lambda x: context, "question": RunnablePassthrough()}
+                    | prompt
+                    | llm
+                    | StrOutputParser()
                 )
-            except Exception as e:
-                st.error(f"❌ Gemini API error: {e}")
-                st.stop()
 
-            chain = (
-                {"context": lambda x: context, "question": RunnablePassthrough()}
-                | prompt
-                | llm
-                | StrOutputParser()
-            )
+                try:
+                    response = chain.invoke(user_query)
+                    st.markdown("### 🤖 CopBot Response:")
+                    st.info(response)
+                except Exception as e:
+                    st.error(f"❌ Error generating response: {e}")
 
-            try:
-                response = chain.invoke(user_query)
-                st.markdown("### 🤖 CopBot Response:")
-                st.info(response)
-            except Exception as e:
-                st.error(f"❌ Error generating response: {e}")
+with tab2:
+    st.markdown("## 👮 Nearby Police Stations - Chennai")
+    st.markdown("### All Police Stations in Chennai with Contact Details")
+
+    for region, stations in {
+        "Central Chennai": ["Parry's Corner", "Royapettah", "Egmore", "Teynampet", "Mylapore", "Thiruvanmiyur"],
+        "South Chennai": ["Velachery", "Pallikaranai", "Tambaram", "Pallavaram", "Kovur", "Vandalur"],
+        "West Chennai": ["Anna Nagar", "Villivakkam", "Ambattur", "Avadi"],
+        "North Chennai": ["Tondiarpet", "Royapuram", "Perambur", "Thiru Vi Ka Nagar"]
+    }.items():
+        st.markdown(f"#### {region}")
+        for station_name in stations:
+            station = chennai_police_stations[station_name]
+            with st.expander(f"📍 {station['name']}"):
+                st.write(f"**Address:** {station['address']}")
+                st.write(f"**Phone:** {station['phone']}")
+                st.write(f"**Jurisdiction:** {station['jurisdiction']}")
+        st.markdown("---")
 
 
 # Footer
