@@ -247,7 +247,7 @@ if st.session_state.show_police_search:
     col1, col2 = st.columns([3, 1])
 
     with col2:
-        # Inject custom HTML input + button
+        # Inject HTML with JS to sync input to session state
         html_code = """
         <div style="display: flex; align-items: center; gap: 8px;">
             <input 
@@ -256,6 +256,7 @@ if st.session_state.show_police_search:
                 placeholder="e.g., Velachery, Kovur"
                 style="width: 300px; padding: 8px; border: 2px solid #1f77b4; border-radius: 4px; font-size: 14px;"
                 value="%s"
+                oninput="document.getElementById('area-input').value.trim() ? st.session_state.area_input = document.getElementById('area-input').value : null;"
             >
             <button 
                 onclick="document.getElementById('area-input').value.trim() && document.getElementById('search-btn').click()"
