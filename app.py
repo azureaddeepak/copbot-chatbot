@@ -247,16 +247,7 @@ if st.session_state.show_police_search:
     col1, col2 = st.columns([3, 1])
 
     with col2:
-        # Hidden input to store value
-        st.text_input(
-            "Enter area:",
-            value=st.session_state.searched_area,
-            key="area_input",
-            label_visibility="collapsed",
-            disabled=True
-        )
-
-        # Visual input box
+        # Only one input box — visual only
         html_code = """
         <div style="display: flex; align-items: center; gap: 8px;">
             <input 
