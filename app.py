@@ -11,26 +11,27 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_google_genai import ChatGoogleGenerativeAI
 from datetime import datetime
 
-# Initialize session state for police station search
+# Initialize session state
 if "show_police_search" not in st.session_state:
     st.session_state.show_police_search = False
 
 if "searched_area" not in st.session_state:
     st.session_state.searched_area = ""
 
-# Initialize session state for RAG
-if "vectorstore" not in st.session_state:
-    st.session_state.vectorstore = None
-if "data_loaded" not in st.session_state:
-    st.session_state.data_loaded = False
+if "area_input" not in st.session_state:
+    st.session_state.area_input = ""
 
-# Initialize session state for auto-hide police result
 if "police_result" not in st.session_state:
     st.session_state.police_result = None
 if "result_shown" not in st.session_state:
     st.session_state.result_shown = False
 if "result_start_time" not in st.session_state:
     st.session_state.result_start_time = None
+
+if "vectorstore" not in st.session_state:
+    st.session_state.vectorstore = None
+if "data_loaded" not in st.session_state:
+    st.session_state.data_loaded = False
 
 # Chennai Police Station Data (City-Wide Coverage)
 chennai_police_stations = {
@@ -170,7 +171,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# Custom CSS for design
+# Custom CSS
 st.markdown("""
 <style>
     .reportview-container { background: #f0f2f6; }
@@ -180,7 +181,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Add logo and title
+# Header
 col1, col2 = st.columns([1, 4])
 with col1:
     try:
@@ -190,7 +191,7 @@ with col1:
 with col2:
     st.title("👮 Chennai District Police Assistance Bot")
 
-# Language toggle in sidebar
+# Sidebar
 with st.sidebar:
     try:
         st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Police_India.svg/1200px-Police_India.svg.png", width=100)
@@ -200,17 +201,16 @@ with st.sidebar:
     st.markdown("### Chennai District Police")
     language = st.radio("Select Language / மொழியைத் தர்ந்தெடுக்கவும்", ["English", "தமிழ் (Tamil)"], index=0)
     st.markdown("---")
-    # Add Gandhi image
     try:
         st.image("gandhi.jpg", use_container_width=True, caption="Mahatma Gandhi")
     except:
         st.caption("Mahatma Gandhi")
 
-# Main content
+# Welcome
 st.markdown("## Police Assistance Cell")
 st.markdown("### 👋 Welcome! I am the Chennai District Police Assistance bot. How can I help you?")
 
-# Buttons — 4 in one row
+# Quick Action Buttons
 btn_col1, btn_col2, btn_col3, btn_col4 = st.columns(4)
 
 with btn_col1:
@@ -239,29 +239,41 @@ with btn_col4:
     if st.button("📍 Find Nearby Police Station", use_container_width=True):
         st.session_state.show_police_search = not st.session_state.show_police_search
 
-# Police Station Search Section — SMALL SEARCH BAR ON RIGHT
+# Police Station Search Section — SMALL RIGHT-ALIGNED SEARCH BAR
 if st.session_state.show_police_search:
     st.markdown("### 🔍 Search Police Station by Area")
 
-    # Create two columns: left (empty), right (search bar + button)
-    col1, col2 = st.columns([3, 1])  # Left takes 3/4, right takes 1/4
+    # Use columns to push search to right
+    col1, col2 = st.columns([3, 1])
 
     with col2:
-        area = st.text_input(
-            "Enter your area:",
-            value=st.session_state.searched_area,
-            key="area_input_unique",
-            placeholder="e.g., Velachery, Kovur",
-            label_visibility="hidden",
-            max_chars=30,
-            style={"width": "300px"}
-        )
-        st.session_state.searched_area = area
+        # Inject custom HTML input + button
+        html_code = """
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <input 
+                type="text" 
+                id="area-input" 
+                placeholder="e.g., Velachery, Kovur"
+                style="width: 300px; padding: 8px; border: 2px solid #1f77b4; border-radius: 4px; font-size: 14px;"
+                value="%s"
+            >
+            <button 
+                onclick="document.getElementById('area-input').value.trim() && document.getElementById('search-btn').click()"
+                style="background-color: #1f77b4; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;"
+            >
+                🔍 Search
+            </button>
+        </div>
+        """ % (st.session_state.searched_area if st.session_state.searched_area else "")
 
-        # Search button
-        if st.button("🔍 Search", key="search_btn"):
-            if area.strip():
-                area_clean = area.strip().title()
+        st.components.v1.html(html_code, height=50)
+
+        # Hidden button to trigger search logic
+        if st.button("🔍 Search", key="search_btn", type="primary"):
+            area = st.session_state.get("area_input", "").strip()
+            if area:
+                area_clean = area.title()
+                st.session_state.searched_area = area_clean
                 if area_clean in chennai_police_stations:
                     st.session_state.police_result = chennai_police_stations[area_clean]
                     st.session_state.result_shown = True
@@ -292,8 +304,8 @@ if st.session_state.show_police_search:
             )
 
     # Show suggestions if not found
-    elif not st.session_state.police_result and area.strip():
-        st.warning(f"⚠️ No exact match for '{area}'. Try these nearby areas:")
+    elif not st.session_state.police_result and st.session_state.searched_area:
+        st.warning(f"⚠️ No exact match for '{st.session_state.searched_area}'. Try these nearby areas:")
         suggestions = list(chennai_police_stations.keys())[:5]
         for loc in suggestions:
             st.write(f"🔹 **{loc}** → {chennai_police_stations[loc]['name']}")
@@ -335,7 +347,6 @@ if not st.session_state.data_loaded:
             from sentence_transformers import SentenceTransformer
             import numpy as np
 
-            # Force CPU usage
             model = SentenceTransformer("all-MiniLM-L6-v2", device="cpu")
             st.write("🧠 Encoding knowledge base...")
             vectors = model.encode(chunks, show_progress_bar=False, device="cpu")
