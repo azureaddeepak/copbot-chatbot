@@ -188,33 +188,12 @@ with st.sidebar:
     except:
         st.caption("Mahatma Gandhi")
 
-tab1, tab2 = st.tabs(["Home", "Nearby Police Stations"])
+tab1, tab2, tab3, tab4 = st.tabs(["Home", "🚨 Emergency Contacts", "📝 How to File Complaint?", "👮 Nearby Police Stations"])
 
 with tab1:
     # Welcome
     st.markdown("## Police Assistance Cell")
     st.markdown("### 👋 Welcome! I am the Chennai District Police Assistance bot. How can I help you?")
-
-    # Quick Action Buttons
-    btn_col1, btn_col2, btn_col3 = st.columns(3)
-
-    with btn_col1:
-        if st.button("🚨 Emergency Contacts", use_container_width=True):
-            st.info("""
-📞 **Police**: 100
-📞 **Women Helpline**: 1091
-📞 **Cyber Crime**: 1930
-📞 **Child Helpline**: 1098
-📞 **Ambulance/Fire**: 112
-""")
-
-    with btn_col2:
-        if st.button("📝 How to File Complaint?", use_container_width=True):
-            st.info("""
-👉 **Online**: Visit [Tamil Nadu Police Portal](https://www.tnpolice.gov.in) → Click 'e-FIR' or 'Complaint'\n
-👉 **Offline**: Visit nearest police station → Submit written complaint → Get stamped copy\n
-👉 **Documents Needed**: ID Proof, Address Proof, Incident Details, Photos/Videos (if any)
-""")
 
 # Load data from Excel (only once)
 @st.cache_data
@@ -343,23 +322,67 @@ if not st.session_state.data_loaded:
                     st.error(f"❌ Error generating response: {e}")
 
 with tab2:
-    st.markdown("## 👮 Nearby Police Stations - Chennai")
-    st.markdown("### All Police Stations in Chennai with Contact Details")
+    st.markdown("## 🚨 Emergency Contacts")
+    st.info("""
+📞 **Police**: 100
+📞 **Women Helpline**: 1091
+📞 **Cyber Crime**: 1930
+📞 **Child Helpline**: 1098
+📞 **Ambulance/Fire**: 112
+""")
 
-    for region, stations in {
-        "Central Chennai": ["Parry's Corner", "Royapettah", "Egmore", "Teynampet", "Mylapore", "Thiruvanmiyur"],
-        "South Chennai": ["Velachery", "Pallikaranai", "Tambaram", "Pallavaram", "Kovur", "Vandalur"],
-        "West Chennai": ["Anna Nagar", "Villivakkam", "Ambattur", "Avadi"],
-        "North Chennai": ["Tondiarpet", "Royapuram", "Perambur", "Thiru Vi Ka Nagar"]
-    }.items():
-        st.markdown(f"#### {region}")
-        for station_name in stations:
-            station = chennai_police_stations[station_name]
-            with st.expander(f"📍 {station['name']}"):
-                st.write(f"**Address:** {station['address']}")
-                st.write(f"**Phone:** {station['phone']}")
-                st.write(f"**Jurisdiction:** {station['jurisdiction']}")
-        st.markdown("---")
+with tab3:
+    st.markdown("## 📝 How to File Complaint?")
+    st.info("""
+👉 **Online**: Visit [Tamil Nadu Police Portal](https://www.tnpolice.gov.in) → Click 'e-FIR' or 'Complaint'\n
+👉 **Offline**: Visit nearest police station → Submit written complaint → Get stamped copy\n
+👉 **Documents Needed**: ID Proof, Address Proof, Incident Details, Photos/Videos (if any)
+""")
+
+with tab4:
+    st.markdown("## 👮 Nearby Police Stations - Chennai")
+    st.markdown("### 🔍 Search Police Station by Area")
+
+    # Search Box
+    area_input = st.text_input("Enter area in Chennai (e.g., Velachery, Kovur)", placeholder="e.g., Velachery, Kovur, Chennai")
+
+    if st.button("🔍 Search", key="search_btn"):
+        if area_input.strip():
+            area_clean = area_input.strip().title()
+            if area_clean in chennai_police_stations:
+                station = chennai_police_stations[area_clean]
+                st.success(f"Found: {station['name']}")
+                st.markdown(
+                    f"""
+                    <div style="background-color:#d4edda; padding:15px; border-radius:8px; margin-top:10px; border-left:5px solid #28a745;">
+                        <strong>📍 {station['name']}</strong><br>
+                        <strong>🏠 Address:</strong> {station['address']}<br>
+                        <strong>📞 Phone:</strong> {station['phone']}<br>
+                        <strong>🗺️ Jurisdiction:</strong> {station['jurisdiction']}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+            else:
+                matches = [loc for loc in chennai_police_stations.keys() if area_input.lower().strip() in loc.lower()]
+                if matches:
+                    station = chennai_police_stations[matches[0]]
+                    st.warning(f"No exact match. Showing closest: {station['name']}")
+                    st.markdown(
+                        f"""
+                        <div style="background-color:#fff3cd; padding:15px; border-radius:8px; margin-top:10px; border-left:5px solid #ffc107;">
+                            <strong>📍 {station['name']}</strong><br>
+                            <strong>🏠 Address:</strong> {station['address']}<br>
+                            <strong>📞 Phone:</strong> {station['phone']}<br>
+                            <strong>🗺️ Jurisdiction:</strong> {station['jurisdiction']}
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+                else:
+                    st.error("No police station found for that area. Try nearby areas like Velachery, Teynampet, etc.")
+        else:
+            st.warning("Please enter an area to search.")
 
 
 # Footer
