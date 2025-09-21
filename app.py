@@ -256,7 +256,7 @@ if st.session_state.show_police_search:
                 placeholder="e.g., Velachery, Kovur"
                 style="width: 300px; padding: 8px; border: 2px solid #1f77b4; border-radius: 4px; font-size: 14px;"
                 value="%s"
-                oninput="setTimeout(() => { if (document.getElementById('area-input').value.trim()) { st.session_state.area_input = document.getElementById('area-input').value; } }, 100);"
+                oninput="st.session_state.area_input = document.getElementById('area-input').value;"
             >
             <button 
                 onclick="document.getElementById('area-input').value.trim() && document.getElementById('search-btn').click()"
@@ -273,26 +273,18 @@ if st.session_state.show_police_search:
         if st.button("🔍 Search", key="search_btn", type="primary"):
             area = st.session_state.get("area_input", "").strip()
             if area:
-                area_lower = area.lower().strip()
-
-                # Try exact match
-                if area_lower in [loc.lower() for loc in chennai_police_stations.keys()]:
-                    area_clean = next(loc for loc in chennai_police_stations.keys() if loc.lower() == area_lower)
+                area_clean = area.title()
+                if area_clean in chennai_police_stations:
                     st.session_state.searched_area = area_clean
                     st.session_state.police_result = chennai_police_stations[area_clean]
                     st.session_state.result_shown = True
                     st.session_state.result_start_time = datetime.now()
                 else:
-                    # Fuzzy match: check if input is part of any station name
-                    matches = []
-                    for loc in chennai_police_stations.keys():
-                        if area_lower in loc.lower():
-                            matches.append(loc)
-
+                    # Fuzzy match
+                    matches = [loc for loc in chennai_police_stations.keys() if area.lower() in loc.lower()]
                     if matches:
-                        area_clean = matches[0]
-                        st.session_state.searched_area = area_clean
-                        st.session_state.police_result = chennai_police_stations[area_clean]
+                        st.session_state.searched_area = matches[0]
+                        st.session_state.police_result = chennai_police_stations[matches[0]]
                         st.session_state.result_shown = True
                         st.session_state.result_start_time = datetime.now()
                     else:
