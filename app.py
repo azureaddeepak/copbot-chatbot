@@ -29,6 +29,8 @@ if "police_result" not in st.session_state:
     st.session_state.police_result = None
 if "result_shown" not in st.session_state:
     st.session_state.result_shown = False
+if "result_start_time" not in st.session_state:
+    st.session_state.result_start_time = None
 
 # Chennai Police Station Data (City-Wide Coverage)
 chennai_police_stations = {
@@ -237,7 +239,7 @@ with btn_col4:
     if st.button("📍 Find Nearby Police Station", use_container_width=True):
         st.session_state.show_police_search = not st.session_state.show_police_search
 
-# Police Station Search Section
+# Police Station Search Section — AUTO-HIDE AFTER 60 SECONDS
 if st.session_state.show_police_search:
     st.markdown("### 🔍 Search Police Station by Area")
     area = st.text_input(
@@ -258,34 +260,32 @@ if st.session_state.show_police_search:
         if result:
             st.session_state.police_result = result
             st.session_state.result_shown = True
+            st.session_state.result_start_time = datetime.now()  # Reset timer
         else:
             st.session_state.police_result = None
             st.session_state.result_shown = False
 
-        # Show result with auto-hide after 60 seconds
+        # Auto-hide after 60 seconds
         if st.session_state.police_result and st.session_state.result_shown:
-            station = st.session_state.police_result
-            html_content = f"""
-            <div id="result-card" style="background-color:#d4edda; padding:15px; border-radius:8px; margin-top:10px; border-left:5px solid #28a745;">
-                <strong>📍 {station['name']}</strong><br>
-                <strong>🏠 Address:</strong> {station['address']}<br>
-                <strong>📞 Phone:</strong> {station['phone']}<br>
-                <strong>🗺️ Jurisdiction:</strong> {station['jurisdiction']}
-            </div>
-            <script>
-                setTimeout(function() {{
-                    var card = document.getElementById('result-card');
-                    if (card) {{
-                        card.style.opacity = '0';
-                        card.style.transition = 'opacity 0.5s ease';
-                        setTimeout(function() {{
-                            card.style.display = 'none';
-                        }}, 500);
-                    }}
-                }}, 60000); // 60 seconds
-            </script>
-            """
-            st.components.v1.html(html_content, height=150)
+            elapsed = (datetime.now() - st.session_state.result_start_time).total_seconds()
+            if elapsed >= 60:
+                st.session_state.result_shown = False
+                st.session_state.result_start_time = None
+
+            # Display only if still active
+            if st.session_state.result_shown:
+                station = st.session_state.police_result
+                st.markdown(
+                    f"""
+                    <div style="background-color:#d4edda; padding:15px; border-radius:8px; margin-top:10px; border-left:5px solid #28a745;">
+                        <strong>📍 {station['name']}</strong><br>
+                        <strong>🏠 Address:</strong> {station['address']}<br>
+                        <strong>📞 Phone:</strong> {station['phone']}<br>
+                        <strong>🗺️ Jurisdiction:</strong> {station['jurisdiction']}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
 
         # Show suggestions if not found
         elif not st.session_state.police_result:
