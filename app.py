@@ -262,19 +262,23 @@ if not st.session_state.data_loaded:
             st.session_state.vectorstore = SimpleVectorStore(index, chunks, model)
 
             # Create agent with web search tool
-            search_tool = DuckDuckGoSearchRun()
-            llm_agent = ChatGoogleGenerativeAI(
-                model="gemini-1.5-flash",
-                google_api_key=st.secrets["GEMINI_API_KEY"],
-                temperature=0,
-                convert_system_message_to_human=True
-            )
-            st.session_state.agent = initialize_agent(
-                tools=[search_tool],
-                llm=llm_agent,
-                agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-                verbose=False
-            )
+            try:
+                search_tool = DuckDuckGoSearchRun()
+                llm_agent = ChatGoogleGenerativeAI(
+                    model="gemini-1.5-flash",
+                    google_api_key=st.secrets["GEMINI_API_KEY"],
+                    temperature=0,
+                    convert_system_message_to_human=True
+                )
+                st.session_state.agent = initialize_agent(
+                    tools=[search_tool],
+                    llm=llm_agent,
+                    agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+                    verbose=False
+                )
+            except Exception as e:
+                st.warning(f"Agent not available: {e}. Falling back to RAG only.")
+                st.session_state.agent = None
 
             st.session_state.data_loaded = True
             st.success("✅ Official Police Knowledge Base Loaded with Agentic Capabilities!")
@@ -297,18 +301,20 @@ with tab5:
             st.markdown("### 🤖 CopBot Response:")
             st.success("Hello! I am the Chennai District Police Assistance Bot. How can I help you today?")
         else:
-            with st.spinner("🤔 CopBot is searching web and thinking... (Agentic AI)"):
-                # Use agent to search web
-                search_result = st.session_state.agent.run(f"Search the web for information related to: {user_query}")
+            with st.spinner("🤔 CopBot is thinking... (AI)"):
+                search_result = ""
+                if st.session_state.agent:
+                    # Use agent to search web
+                    search_result = st.session_state.agent.run(f"Search the web for information related to: {user_query}")
 
-                # Add search result to vectorstore
-                if search_result.strip():
-                    chunks_new = st.session_state.text_splitter.split_text(search_result)
-                    vectors_new = st.session_state.model.encode(chunks_new, show_progress_bar=False, device="cpu")
-                    st.session_state.vectorstore.index.add(vectors_new.astype('float32'))
-                    st.session_state.vectorstore.texts.extend(chunks_new)
+                    # Add search result to vectorstore
+                    if search_result.strip():
+                        chunks_new = st.session_state.text_splitter.split_text(search_result)
+                        vectors_new = st.session_state.model.encode(chunks_new, show_progress_bar=False, device="cpu")
+                        st.session_state.vectorstore.index.add(vectors_new.astype('float32'))
+                        st.session_state.vectorstore.texts.extend(chunks_new)
 
-                # Now retrieve from updated vectorstore
+                # Retrieve from vectorstore (updated if agent used)
                 docs = st.session_state.vectorstore.similarity_search(user_query, k=3)
                 context = "\n".join([doc["page_content"] for doc in docs])
 
