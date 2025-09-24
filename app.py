@@ -10,7 +10,11 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.tools import tool
 from langchain.agents import initialize_agent, AgentType
 import requests
-from bs4 import BeautifulSoup
+try:
+    from bs4 import BeautifulSoup
+    BS4_AVAILABLE = True
+except ImportError:
+    BS4_AVAILABLE = False
 from datetime import datetime
 
 # Initialize session state
@@ -266,6 +270,8 @@ if not st.session_state.data_loaded:
             # Define custom web search tool
             @tool
             def duckduckgo_search(query: str) -> str:
+                if not BS4_AVAILABLE:
+                    return "Web search not available: BeautifulSoup not installed."
                 try:
                     url = f"https://duckduckgo.com/html/?q={query}"
                     response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
@@ -277,21 +283,25 @@ if not st.session_state.data_loaded:
                     return f"Search failed: {e}"
 
             # Create agent with web search tool
-            try:
-                llm_agent = ChatGoogleGenerativeAI(
-                    model="gemini-1.5-flash",
-                    google_api_key=st.secrets["GEMINI_API_KEY"],
-                    temperature=0,
-                    convert_system_message_to_human=True
-                )
-                st.session_state.agent = initialize_agent(
-                    tools=[duckduckgo_search],
-                    llm=llm_agent,
-                    agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-                    verbose=False
-                )
-            except Exception as e:
-                st.warning(f"Agent not available: {e}. Falling back to RAG only.")
+            if BS4_AVAILABLE:
+                try:
+                    llm_agent = ChatGoogleGenerativeAI(
+                        model="gemini-1.5-flash",
+                        google_api_key=st.secrets["GEMINI_API_KEY"],
+                        temperature=0,
+                        convert_system_message_to_human=True
+                    )
+                    st.session_state.agent = initialize_agent(
+                        tools=[duckduckgo_search],
+                        llm=llm_agent,
+                        agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+                        verbose=False
+                    )
+                except Exception as e:
+                    st.warning(f"Agent not available: {e}. Falling back to RAG only.")
+                    st.session_state.agent = None
+            else:
+                st.warning("Web search not available: BeautifulSoup not installed. Falling back to RAG only.")
                 st.session_state.agent = None
 
             st.session_state.data_loaded = True
