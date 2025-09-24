@@ -270,6 +270,7 @@ if not st.session_state.data_loaded:
             # Define custom web search tool
             @tool
             def duckduckgo_search(query: str) -> str:
+                """Search the web using DuckDuckGo and return top results."""
                 if not BS4_AVAILABLE:
                     return "Web search not available: BeautifulSoup not installed."
                 try:
