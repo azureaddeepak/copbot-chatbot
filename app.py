@@ -302,7 +302,6 @@ if not st.session_state.data_loaded:
                     st.warning(f"Agent not available: {e}. Falling back to RAG only.")
                     st.session_state.agent = None
             else:
-                st.warning("Web search not available: BeautifulSoup not installed. Falling back to RAG only.")
                 st.session_state.agent = None
 
             st.session_state.data_loaded = True
