@@ -7,8 +7,10 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_community.tools import DuckDuckGoSearchRun
+from langchain.tools import tool
 from langchain.agents import initialize_agent, AgentType
+import requests
+from bs4 import BeautifulSoup
 from datetime import datetime
 
 # Initialize session state
@@ -261,9 +263,21 @@ if not st.session_state.data_loaded:
 
             st.session_state.vectorstore = SimpleVectorStore(index, chunks, model)
 
+            # Define custom web search tool
+            @tool
+            def duckduckgo_search(query: str) -> str:
+                try:
+                    url = f"https://duckduckgo.com/html/?q={query}"
+                    response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
+                    soup = BeautifulSoup(response.text, 'html.parser')
+                    results = soup.find_all('a', class_='result__a')
+                    snippets = [result.get_text() for result in results[:5]]
+                    return '\n'.join(snippets)
+                except Exception as e:
+                    return f"Search failed: {e}"
+
             # Create agent with web search tool
             try:
-                search_tool = DuckDuckGoSearchRun()
                 llm_agent = ChatGoogleGenerativeAI(
                     model="gemini-1.5-flash",
                     google_api_key=st.secrets["GEMINI_API_KEY"],
@@ -271,7 +285,7 @@ if not st.session_state.data_loaded:
                     convert_system_message_to_human=True
                 )
                 st.session_state.agent = initialize_agent(
-                    tools=[search_tool],
+                    tools=[duckduckgo_search],
                     llm=llm_agent,
                     agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
                     verbose=False
