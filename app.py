@@ -64,7 +64,7 @@ if "data_loaded" not in st.session_state:
 # Load data from Excel (only once)
 @st.cache_data
 def load_data():
-    df = pd.read_excel("Chatbot_Data (2).xlsx")
+    df = pd.read_excel("Chatbot_Data.xlsx")
     return df
 
 if not st.session_state.data_loaded:
