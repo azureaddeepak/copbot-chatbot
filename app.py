@@ -86,11 +86,18 @@ with tab1:
                         answer_part = section.split("Answer:")[1].split("|")[0].strip()
                         answers.append(answer_part)
                 if answers:
-                    response = "Based on official police data:\n\n" + "\n\n".join(answers[:2])  # Limit to top 2 answers
+                    response_text = "\n\n".join(answers[:2])
+                    if language == "தமிழ் (Tamil)":
+                        response = f"அதிகாரப்பூர்வ காவல்துறை தரவுகளின் அடிப்படையில்:\n\n{response_text}\n\n(பதில் ஆங்கிலத்தில் உள்ளது. தமிழ் மொழிபெயர்ப்பு விரைவில் சேர்க்கப்படும்.)"
+                    else:
+                        response = "Based on official police data:\n\n" + response_text
                 else:
                     response = f"Based on official police data:\n\n{context}"
             else:
-                response = "I cannot find relevant information in the official database. Please contact the police directly."
+                if language == "தமிழ் (Tamil)":
+                    response = "அதிகாரப்பூர்வ தரவுத்தளத்தில் தொடர்புடைய தகவலை கண்டுபிடிக்க முடியவில்லை. தயவுசெய்து காவல்துறையை நேரடியாக தொடர்பு கொள்ளவும்."
+                else:
+                    response = "I cannot find relevant information in the official database. Please contact the police directly."
 
             st.markdown("### 🤖 CopBot Response:")
             st.info(response)
