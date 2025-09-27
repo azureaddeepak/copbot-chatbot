@@ -138,7 +138,7 @@ if not st.session_state.data_loaded:
             if BS4_AVAILABLE:
                 try:
                     llm_agent = ChatGoogleGenerativeAI(
-                        model="gemini-1.5-pro",
+                        model="gemini-pro",
                         google_api_key=st.secrets["GEMINI_API_KEY"],
                         temperature=0,
                         convert_system_message_to_human=True
@@ -207,7 +207,7 @@ if user_query and st.session_state.vectorstore:
 
         # ✅ SECURE: Use API key from Streamlit Secrets
         llm = ChatGoogleGenerativeAI(
-            model="gemini-1.5-pro",
+            model="gemini-pro",
             google_api_key=st.secrets["GEMINI_API_KEY"],  # ← Securely loaded
             temperature=0,
             convert_system_message_to_human=True
@@ -226,6 +226,7 @@ if user_query and st.session_state.vectorstore:
             st.info(response)
         except Exception as e:
             st.error(f"❌ Error generating response: {e}")
+            st.info("Please try again or contact support. The knowledge base is loaded, but AI response failed.")
 
 # Footer
 st.markdown("---")
