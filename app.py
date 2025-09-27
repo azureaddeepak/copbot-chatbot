@@ -118,41 +118,8 @@ if not st.session_state.data_loaded:
 
             st.session_state.vectorstore = SimpleVectorStore(index, chunks, model)
 
-            # Define custom web search tool
-            @tool
-            def duckduckgo_search(query: str) -> str:
-                """Search the web using DuckDuckGo and return top results."""
-                if not BS4_AVAILABLE:
-                    return "Web search not available: BeautifulSoup not installed."
-                try:
-                    url = f"https://duckduckgo.com/html/?q={query}"
-                    response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
-                    soup = BeautifulSoup(response.text, 'html.parser')
-                    results = soup.find_all('a', class_='result__a')
-                    snippets = [result.get_text() for result in results[:5]]
-                    return '\n'.join(snippets)
-                except Exception as e:
-                    return f"Search failed: {e}"
-
-            # Create agent with web search tool
-            if BS4_AVAILABLE:
-                try:
-                    llm_agent = ChatGoogleGenerativeAI(
-                        model="gemini-pro",
-                        google_api_key=st.secrets["GEMINI_API_KEY"],
-                        temperature=0,
-                        convert_system_message_to_human=True
-                    )
-                    st.session_state.agent = initialize_agent(
-                        tools=[duckduckgo_search],
-                        llm=llm_agent,
-                        agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-                        verbose=False
-                    )
-                except Exception as e:
-                    st.session_state.agent = None
-            else:
-                st.session_state.agent = None
+            # Agent disabled to avoid API issues
+            st.session_state.agent = None
 
             st.session_state.data_loaded = True
             st.success("✅ Official Police Knowledge Base Loaded with Agentic Capabilities!")
