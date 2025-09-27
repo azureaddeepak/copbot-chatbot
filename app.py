@@ -160,7 +160,17 @@ if user_query and st.session_state.vectorstore:
 
         # Fallback to direct context response since LLM is failing
         if context.strip():
-            response = f"Based on official police data:\n\n{context}"
+            # Extract only the Answer parts from the context
+            answers = []
+            sections = context.split("Category:")
+            for section in sections[1:]:  # Skip the first empty part
+                if "Answer:" in section:
+                    answer_part = section.split("Answer:")[1].split("|")[0].strip()
+                    answers.append(answer_part)
+            if answers:
+                response = "Based on official police data:\n\n" + "\n\n".join(answers[:2])  # Limit to top 2 answers
+            else:
+                response = f"Based on official police data:\n\n{context}"
         else:
             response = "I cannot find relevant information in the official database. Please contact the police directly."
 
