@@ -34,9 +34,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Language toggle
-col_lang1, col_lang2, col_lang3 = st.columns([1, 1, 1])
-with col_lang2:
-    language = st.radio("Select Language / மொழியைத் தேர்ந்தெடுக்கவும்", ["English", "தமிழ் (Tamil)"], index=0, horizontal=True)
+language = st.radio("Select Language / மொழியைத் தேர்ந்தெடுக்கவும்", ["English", "தமிழ் (Tamil)"], index=0, horizontal=True)
 
 # Main Header
 col1, col2, col3 = st.columns([1, 2, 1])
