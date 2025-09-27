@@ -158,42 +158,14 @@ if user_query and st.session_state.vectorstore:
         docs = st.session_state.vectorstore.similarity_search(user_query, k=3)
         context = "\n".join([doc["page_content"] for doc in docs])
 
-        template = """You are 'CopBot', the official AI assistant of Chennai District Police.
-        Answer the question based ONLY on the context provided.
-        If unsure, say "I cannot answer based on official data."
-        Keep response clear, concise, and citizen-friendly.
-        Respond in the SAME LANGUAGE as the question.
+        # Fallback to direct context response since LLM is failing
+        if context.strip():
+            response = f"Based on official police data:\n\n{context}"
+        else:
+            response = "I cannot find relevant information in the official database. Please contact the police directly."
 
-        Context: {context}
-
-        Question: {question}
-
-        Answer:"""
-
-        prompt = ChatPromptTemplate.from_template(template)
-
-        # ✅ SECURE: Use API key from Streamlit Secrets
-        llm = ChatGoogleGenerativeAI(
-            model="gemini-pro",
-            google_api_key=st.secrets["GEMINI_API_KEY"],  # ← Securely loaded
-            temperature=0,
-            convert_system_message_to_human=True
-        )
-
-        chain = (
-            {"context": lambda x: context, "question": RunnablePassthrough()}
-            | prompt
-            | llm
-            | StrOutputParser()
-        )
-
-        try:
-            response = chain.invoke(user_query)
-            st.markdown("### 🤖 CopBot Response:")
-            st.info(response)
-        except Exception as e:
-            st.error(f"❌ Error generating response: {e}")
-            st.info("Please try again or contact support. The knowledge base is loaded, but AI response failed.")
+        st.markdown("### 🤖 CopBot Response:")
+        st.info(response)
 
 # Footer
 st.markdown("---")
