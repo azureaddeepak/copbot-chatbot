@@ -37,12 +37,18 @@ st.markdown("""
 language = st.radio("Select Language / மொழியைத் தேர்ந்தெடுக்கவும்", ["English", "தமிழ் (Tamil)"], index=0, horizontal=True)
 
 # Main Header
-if language == "English":
-    st.title("👮 Welcome to Chennai District Police Assistance Bot")
-    st.markdown("Ask me anything about filing complaints, FIRs, procedures, or emergency contacts.")
-else:
-    st.title("👮 சென்னை மாவட்ட காவல்துறை உதவி போட் க்கு வரவேற்கிறோம்")
-    st.markdown("புகார் பதிவு, எஃப்ஐஆர், நடைமுறைகள் அல்லது அவசர தொடர்புகள் குறித்து என்னிடம் கேளுங்கள்.")
+col1, col2, col3 = st.columns([1, 2, 1])
+with col1:
+    st.image("tn_logo.png", width=100)
+with col2:
+    if language == "English":
+        st.title("👮 Welcome to Chennai District Police Assistance Bot")
+        st.markdown("Ask me anything about filing complaints, FIRs, procedures, or emergency contacts.")
+    else:
+        st.title("👮 சென்னை மாவட்ட காவல்துறை உதவி போட் க்கு வரவேற்கிறோம்")
+        st.markdown("புகார் பதிவு, எஃப்ஐஆர், நடைமுறைகள் அல்லது அவசர தொடர்புகள் குறித்து என்னிடம் கேளுங்கள்.")
+with col3:
+    st.image("gandhi.jpg", width=100)
 
 # Tabs
 tab1, tab2, tab3, tab4 = st.tabs(["🏠 Home", "📝 Complaints", "📄 FIR", "🆘 Emergency"])
