@@ -18,7 +18,7 @@ except ImportError:
 
 # Set page config
 st.set_page_config(
-    page_title="👮 CopBotChatbox - Thoothukudi Police",
+    page_title="👮 CopBotChatbox - Chennai Police",
     page_icon="👮",
     layout="wide"
 )
@@ -37,7 +37,7 @@ st.markdown("""
 with st.sidebar:
     st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Police_India.svg/1200px-Police_India.svg.png", width=100)
     st.title("👮 CopBotChatbox")
-    st.markdown("### Thoothukudi District Police")
+    st.markdown("### Chennai District Police")
     language = st.radio("Select Language / மொழியைத் தேர்ந்தெடுக்கவும்", ["English", "தமிழ் (Tamil)"], index=0)
     st.markdown("---")
     st.markdown("### 📍 Police Stations")
@@ -49,10 +49,10 @@ with st.sidebar:
 
 # Main Header
 if language == "English":
-    st.title("👮 Welcome to Thoothukudi District Police Assistance Bot")
+    st.title("👮 Welcome to Chennai District Police Assistance Bot")
     st.markdown("Ask me anything about filing complaints, FIRs, procedures, or emergency contacts.")
 else:
-    st.title("👮 தூத்துக்குடி மாவட்ட காவல்துறை உதவி போட் க்கு வரவேற்கிறோம்")
+    st.title("👮 சென்னை மாவட்ட காவல்துறை உதவி போட் க்கு வரவேற்கிறோம்")
     st.markdown("புகார் பதிவு, எஃப்ஐஆர், நடைமுறைகள் அல்லது அவசர தொடர்புகள் குறித்து என்னிடம் கேளுங்கள்.")
 
 # Initialize session state
@@ -64,7 +64,7 @@ if "data_loaded" not in st.session_state:
 # Load data from Excel (only once)
 @st.cache_data
 def load_data():
-    df = pd.read_excel("Chatbot_Data.xlsx")
+    df = pd.read_excel("Chatbot_Data (2).xlsx")
     return df
 
 if not st.session_state.data_loaded:
@@ -187,7 +187,7 @@ if user_query and st.session_state.vectorstore:
         docs = st.session_state.vectorstore.similarity_search(user_query, k=3)
         context = "\n".join([doc["page_content"] for doc in docs])
 
-        template = """You are 'CopBot', the official AI assistant of Thoothukudi District Police.
+        template = """You are 'CopBot', the official AI assistant of Chennai District Police.
         Answer the question based ONLY on the context provided.
         If unsure, say "I cannot answer based on official data."
         Keep response clear, concise, and citizen-friendly.
@@ -225,4 +225,4 @@ if user_query and st.session_state.vectorstore:
 
 # Footer
 st.markdown("---")
-st.caption("ℹ️ Official demo by Thoothukudi District Police. Powered by Google Gemini. Responses based only on official documents.")
+st.caption("ℹ️ Official demo by Chennai District Police. Powered by Google Gemini. Responses based only on official documents.")
