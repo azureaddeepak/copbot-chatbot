@@ -173,15 +173,19 @@ if user_query and st.session_state.vectorstore:
     with st.spinner("🤔 CopBot is thinking... (AI)"):
         search_result = ""
         if st.session_state.agent:
-            # Use agent to search web
-            search_result = st.session_state.agent.run(f"Search the web for information related to: {user_query}")
+            try:
+                # Use agent to search web
+                search_result = st.session_state.agent.run(f"Search the web for information related to: {user_query}")
 
-            # Add search result to vectorstore
-            if search_result.strip():
-                chunks_new = st.session_state.text_splitter.split_text(search_result)
-                vectors_new = st.session_state.model.encode(chunks_new, show_progress_bar=False, device="cpu")
-                st.session_state.vectorstore.index.add(vectors_new.astype('float32'))
-                st.session_state.vectorstore.texts.extend(chunks_new)
+                # Add search result to vectorstore
+                if search_result.strip():
+                    chunks_new = st.session_state.text_splitter.split_text(search_result)
+                    vectors_new = st.session_state.model.encode(chunks_new, show_progress_bar=False, device="cpu")
+                    st.session_state.vectorstore.index.add(vectors_new.astype('float32'))
+                    st.session_state.vectorstore.texts.extend(chunks_new)
+            except Exception as e:
+                st.warning(f"Web search failed: {e}. Proceeding with local knowledge base only.")
+                search_result = ""
 
         # Retrieve from vectorstore (updated if agent used)
         docs = st.session_state.vectorstore.similarity_search(user_query, k=3)
