@@ -138,7 +138,7 @@ if not st.session_state.data_loaded:
             if BS4_AVAILABLE:
                 try:
                     llm_agent = ChatGoogleGenerativeAI(
-                        model="gemini-pro",
+                        model="gemini-1.5-flash",
                         google_api_key=st.secrets["GEMINI_API_KEY"],
                         temperature=0,
                         convert_system_message_to_human=True
@@ -203,7 +203,7 @@ if user_query and st.session_state.vectorstore:
 
         # ✅ SECURE: Use API key from Streamlit Secrets
         llm = ChatGoogleGenerativeAI(
-            model="gemini-pro",
+            model="gemini-1.5-flash",
             google_api_key=st.secrets["GEMINI_API_KEY"],  # ← Securely loaded
             temperature=0,
             convert_system_message_to_human=True
